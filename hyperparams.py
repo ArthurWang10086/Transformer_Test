@@ -56,7 +56,7 @@ class Hyperparams:
     print_model = transformer_model_file+'epoch1batch%s.ckpt'%(str(saver_step))
 
 #FILE_PATH = '/home/zhongqian/yuyi-prediction-dataset/nsh2/newplayer/'
-    FILE_PATH = ''
+    FILE_PATH = 'data/'
     #normal_dataset_file_train = '/home/luoyifan/dataset/nsh/sanhuangua/transformer/v_3/dataset/normal_train/'
     #plug_dataset_file_train = '/home/luoyifan/dataset/nsh/sanhuangua/transformer/v_3/dataset/plugin_train/'
     #normal_dataset_file_test = '/home/luoyifan/dataset/nsh/sanhuangua/transformer/v_3/dataset/normal_test/'
