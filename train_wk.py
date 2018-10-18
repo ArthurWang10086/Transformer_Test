@@ -203,10 +203,10 @@ class Transformer_Graph():
                                  is_training:True,
                                  batch_time:train_times_batch
                                  })
-                            print('enc1',enc1.get_shape())
-                            print('enc2',enc2.get_shape())
-                            print('enc3',enc3.get_shape())
-                            print('logits',logits_.get_shape())
+                            print('enc1',enc1.shape)
+                            print('enc2',enc2.shape)
+                            print('enc3',enc3.shape)
+                            print('logits',logits_.shape)
                             #print('logloss',logloss_)
                             #print('cost_',loss)
                             #print('preds_',preds_)
