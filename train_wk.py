@@ -46,7 +46,6 @@ class Transformer_Graph():
             y_file = open(hp.y_file_test, 'rb')
             y_list = pickle.load(y_file)
 
-
         X_ndarray = np.array(x_list)
         Time_ndarray = np.array(Time_list)
         y_ndarray = np_utils.to_categorical(y_list, hp.output_unit)   #根据Loss定
@@ -196,17 +195,17 @@ class Transformer_Graph():
 
                         # Training step
                         with tf.name_scope('loss'):
-                            summary, _, enc1,enc2,enc3,logits_, loss, logloss_, preds_, acc = sess.run(
+                            summary, _, enc1_,enc2_,enc3_,logits_, loss, logloss_, preds_, train_acc = sess.run(
                                 [merged, train_op, enc1,enc2,enc3,logits, cost, logloss, preds, acc],
                                 {input_data_logdesignid_enc: pad_enc_logdesignid_batch,
                                  batch_target: train_targets_batch,
                                  is_training:True,
                                  batch_time:train_times_batch
                                  })
-                            print('enc1',enc1.shape)
-                            print('enc2',enc2.shape)
-                            print('enc3',enc3.shape)
-                            print('logits',logits_.shape)
+                            # print('enc1',enc1_.shape)
+                            # print('enc2',enc2_.shape)
+                            # print('enc3',enc3_.shape)
+                            # print('logits',logits_.shape)
                             #print('logloss',logloss_)
                             #print('cost_',loss)
                             #print('preds_',preds_)
@@ -234,7 +233,7 @@ class Transformer_Graph():
                                           (batch_i % max_batchsize) + 1,
                                           max_batchsize,
                                           loss,
-                                          acc,
+                                          train_acc,
                                           validation_loss,
                                           validation_acc
                                           ))
