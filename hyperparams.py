@@ -51,8 +51,9 @@ class Hyperparams:
 
     # other
     display_step = 1  # Check training loss after every display_step batches
-    saver_step = 100
+    saver_step = 1000
     output_unit=38
+    print_model = transformer_model_file+'epoch1batch%s.ckpt'%(str(saver_step))
 
 #FILE_PATH = '/home/zhongqian/yuyi-prediction-dataset/nsh2/newplayer/'
     FILE_PATH = ''

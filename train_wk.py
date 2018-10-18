@@ -23,9 +23,9 @@ class Transformer_Graph():
     def get_model_inputs(self):
         with tf.name_scope('inputs'):
             # input_data_logdesignid_enc = tf.placeholder(tf.int32, [hp.batch_size, hp.maxlen+1], name='input_logdesignid_enc')
-            input_data_logdesignid_enc = tf.placeholder(tf.int32, [hp.batch_size, hp.maxlen],name='input_logdesignid_enc')
-            time = tf.placeholder(tf.int32, [hp.batch_size, hp.maxlen],name='times')
-            target = tf.placeholder(tf.float32, [hp.batch_size,hp.output_unit], name='targets')
+            input_data_logdesignid_enc = tf.placeholder(tf.int32, [None, hp.maxlen],name='input_logdesignid_enc')
+            time = tf.placeholder(tf.int32, [None, hp.maxlen],name='times')
+            target = tf.placeholder(tf.float32, [None,hp.output_unit], name='targets')
             is_training = tf.placeholder(tf.bool, name='is_training')
 
         return input_data_logdesignid_enc, target, is_training, time
@@ -109,7 +109,6 @@ class Transformer_Graph():
                                               causality=False)
                     enc2 = feedforward(enc1, num_units=[4 * hp.hidden_units, hp.hidden_units])
 
-
         with tf.variable_scope("softmax"):
 
             enc3 = tf.layers.dense(enc2,hp.hidden_units/4)
@@ -131,6 +130,10 @@ class Transformer_Graph():
             with tf.name_scope("optimization"):
                 # Create the training and inference logits
                 enc1,enc2,enc3,logits = self.transformer(input_data_logdesignid_enc,hp.output_unit,batch_target,batch_time)
+                tf.add_to_collection('latent_enc1', enc1)
+                tf.add_to_collection('latent_enc2', enc2)
+                tf.add_to_collection('latent_enc3', enc3)
+                tf.add_to_collection('latent_logits', logits)
                 # Predicr label
                 # preds = tf.nn.sigmoid(logits)
                 preds = logits
