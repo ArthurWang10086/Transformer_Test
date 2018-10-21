@@ -28,10 +28,10 @@ class tfModel:
                                                                             target: input[1],
                                                                             is_training:False,
                                                                             time: input[2]})
-        # print('enc1',enc1_.shape)
-        # print('enc2',enc2_.shape)
-        # print('enc3',enc3_.shape)
-        # print('logits',logits_.shape)
+        print('enc1',enc1_.shape)
+        print('enc2',enc2_.shape)
+        print('enc3',enc3_.shape)
+        print('logits',logits_.shape)
         return enc1_,enc2_,enc3_,logits_
 
 if __name__ == '__main__':
@@ -55,6 +55,21 @@ if __name__ == '__main__':
     X_ndarray = np.array(x_list)
     Time_ndarray = np.array(Time_list)
     y_ndarray = np_utils.to_categorical(y_list, hp.output_unit)
-    (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs) = (x_list, y_ndarray, Time_ndarray)
+    (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs) = (x_list[:100], y_ndarray[:100], Time_ndarray[:100])
 
     enc1_,enc2_,enc3_,logits_ = p.predict([pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs])
+    L=[]
+    for i in range(0,len(pad_enc_valid_logdesignid_batch)):
+        L.append('\t'.join([','.join([str(x) for x in pad_enc_valid_logdesignid_batch[i]])
+                           ,','.join([str(x) for x in valid_times_batchs[i]])
+                           ,str(np.argmax(valid_targets_batchs[i]))
+                           ,'@'.join([','.join([str(z) for z in y]) for y in enc1_[i]])
+                           ,'@'.join([','.join([str(z) for z in y]) for y in enc2_[i]])
+                           ,'@'.join([','.join([str(z) for z in y]) for y in enc3_[i]])
+                           ,','.join([str(z) for z in logits_[i]])]))
+    with open('data/output/all_latenttrain_seq'+str(hp.maxlen+1)+'.txt','w') as f:
+        f.write('\n'.join(L))
+
+
+
+

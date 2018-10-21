@@ -63,10 +63,10 @@ class Hyperparams:
     #plug_dataset_file_test = '/home/luoyifan/dataset/nsh/sanhuangua/transformer/v_3/dataset/plugin_test/'
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'
-    Time_file_train = FILE_PATH + 'all_Timetrain_seq' + str(maxlen + 1) + '.pkl'
+    Time_file_train = FILE_PATH + 'all_timetrain_seq' + str(maxlen + 1) + '.pkl'
     y_file_train = FILE_PATH + 'all_labeltrain_seq' + str(maxlen + 1) + '.pkl'
     X_file_test = FILE_PATH + 'all_datatest_seq' + str(maxlen + 1) + '.pkl'
-    Time_file_test = FILE_PATH + 'all_Timetest_seq' + str(maxlen + 1) + '.pkl'
-    y_file_test = FILE_PATH + 'all_labeltest_seq' + str(maxlen + 1) + '.pkl'
+    Time_file_test = FILE_PATH + 'all_timetest_seq' + str(maxlen + 1) + '.pkl'
+    y_file_test = FILE_PATH + 'allt_labeltest_seq' + str(maxlen + 1) + '.pkl'
 
 
