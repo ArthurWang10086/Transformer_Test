@@ -35,14 +35,14 @@ class Hyperparams:
     log_file_dir = 'log/train_log.log'
 
     # training
-    batch_size = 32
-    learning_rate = 0.0001
+    batch_size = 16
+    learning_rate = 0.001
 
     # model
     vocab_size = 1000
     maxlen = 10  # max length of Pad Sequence
     min_cnt = 3  # words whose occurred less than min_cnt are encoded as <UNK>.
-    hidden_units = 128
+    hidden_units = 16
     num_blocks = 3  # number of encoder/decoder blocks
     num_heads = 8
     dropout_rate = 0.1

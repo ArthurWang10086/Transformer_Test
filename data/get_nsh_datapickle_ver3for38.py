@@ -1,6 +1,7 @@
 import json
 import pickle
 import sys
+import math
 from hyperparams import Hyperparams as hp
 import os
 
@@ -38,12 +39,15 @@ if __name__ == '__main__':
         if len(data)< YUZHI:
             continue
         for i in range(len(data)-YUZHI+1):
-            final_time.append(data[i:i+YUZHI-1])
+            L = data[i:i+YUZHI-1]
+            L = [abs(x- L[-1]) for x in L]
+            final_time.append([float(float(x)/(max(L)+0.00001)) for x in L][:])
+            #final_time.append(L)
         if len(final_time)>70000:
             break
 
 
-    print(len(final_label))
+    print(len(final_label),len(final_time))
     pickle.dump(final_data, open('all_datatrain_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_time, open('all_timetrain_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_label, open('all_labeltrain_seq'+str(YUZHI)+'.pkl', "wb"))
@@ -67,6 +71,7 @@ if __name__ == '__main__':
             final_label.append(data[i+YUZHI-1])
         if len(final_label)>30000:
             break
+    file.close()
 
     file = open('dataset/savefile_time_test1.txt','r')
     final_time=[]
@@ -81,11 +86,14 @@ if __name__ == '__main__':
         if len(data)< YUZHI:
             continue
         for i in range(len(data)-YUZHI+1):
-            final_time.append(data[i:i+YUZHI-1])
-        if len(final_time)>70000:
+            L = data[i:i+YUZHI-1]
+            L = [abs(x- L[-1]) for x in L]
+            final_time.append([float(float(x)/(max(L)+0.00001)) for x in L][:])
+            #final_time.append(L)
+        if len(final_time)>30000:
             break
 
-    print(len(final_label))
+    print(len(final_data),len(final_time))
     pickle.dump(final_data, open('all_datatest_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_time, open('all_timetest_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_label, open('all_labeltest_seq'+str(YUZHI)+'.pkl', "wb"))

@@ -19,12 +19,17 @@ class Transformer_Graph():
         self.graph = tf.Graph()
         self.is_training = is_training
         self.train_size = train_size
+        self.acc_count = 0
+        self.acc_true = 0
+        self.acc_count_test = 0
+        self.acc_true_test = 0
+        self.loss_sum = 0
 
     def get_model_inputs(self):
         with tf.name_scope('inputs'):
             # input_data_logdesignid_enc = tf.placeholder(tf.int32, [hp.batch_size, hp.maxlen+1], name='input_logdesignid_enc')
             input_data_logdesignid_enc = tf.placeholder(tf.int32, [None, hp.maxlen],name='input_logdesignid_enc')
-            time = tf.placeholder(tf.int32, [None, hp.maxlen],name='times')
+            time = tf.placeholder(tf.float32, [None, hp.maxlen],name='times')
             target = tf.placeholder(tf.float32, [None,hp.output_unit], name='targets')
             is_training = tf.placeholder(tf.bool, name='is_training')
 
@@ -96,30 +101,32 @@ class Transformer_Graph():
                 enc = tf.layers.dropout(enc,
                                         rate=hp.dropout_rate,
                                         training=tf.convert_to_tensor(self.is_training))
+            time = time
             ## Blocks
             for i in range(hp.num_blocks):
                 with tf.variable_scope("num_blocks_{}".format(i)):
                     ### Multihead Attention
-                    enc1 = multihead_attention(queries=enc,
+                    enc1,align_score = multihead_attention_time_mask(queries=enc,
                                               keys=enc,
                                               num_units=hp.hidden_units,
                                               num_heads=hp.num_heads,
                                               dropout_rate=hp.dropout_rate,
                                               is_training=self.is_training,
-                                              causality=False)
+                                              causality=False,T_input=time)
                     enc2 = feedforward(enc1, num_units=[4 * hp.hidden_units, hp.hidden_units])
 
         with tf.variable_scope("softmax"):
 
-            enc3 = tf.layers.dense(enc2,hp.hidden_units/4)
-            print('------------------enc_shape',enc.get_shape())
+            # enc3 = tf.layers.dense(enc2,hp.hidden_units/4,activation=tf.nn.relu)
+            # print('------------------enc_shape',enc.get_shape())
+            enc3=enc2
             flatten = tf.contrib.layers.flatten(enc3)
             print('------------------enc_shape', flatten.get_shape())
             #enc = tf.reshape(enc,[hp.batch_size,(hp.maxlen+1)*(hp.hidden_units/4)])
             logits = tf.layers.dense(flatten, hp.output_unit,activation=tf.nn.softmax)
         # print('enc,logits shape:',enc.get_shape(),logits.get_shape())
 
-        return enc1,enc2,enc3,logits
+        return enc1,enc2,enc3,logits,align_score
 
     def model_train(self):
         #self.action_length = len(self.id2action)
@@ -129,7 +136,7 @@ class Transformer_Graph():
 
             with tf.name_scope("optimization"):
                 # Create the training and inference logits
-                enc1,enc2,enc3,logits = self.transformer(input_data_logdesignid_enc,hp.output_unit,batch_target,batch_time)
+                enc1,enc2,enc3,logits,align_score = self.transformer(input_data_logdesignid_enc,hp.output_unit,batch_target,batch_time)
                 tf.add_to_collection('latent_enc1', enc1)
                 tf.add_to_collection('latent_enc2', enc2)
                 tf.add_to_collection('latent_enc3', enc3)
@@ -148,10 +155,14 @@ class Transformer_Graph():
                 # Loss
                 logloss = tf.nn.softmax_cross_entropy_with_logits(labels=batch_target, logits=logits)
                 # logloss = tf.nn.sigmoid_cross_entropy_with_logits(labels=batch_target, logits=logits)
-                cost = tf.reduce_sum(logloss) / (hp.batch_size)
+                cost = tf.reduce_mean(logloss)
 
-                output = tf.round(preds)
-                acc = tf.reduce_sum(tf.to_float(tf.equal(output, batch_target)))/ (hp.batch_size)
+                output = preds
+                # acc, acc_op = tf.metrics.accuracy(labels=tf.argmax(batch_target),
+                #                                   predictions=tf.argmax(logits))
+
+                acc = tf.reduce_mean(tf.to_float(tf.equal(tf.argmax(preds),tf.argmax(batch_target))))
+                acc_op =acc
                 # TP = tf.count_nonzero(output * batch_target)
                 # TN = tf.count_nonzero((output - 1) * (batch_target - 1))
                 # FP = tf.count_nonzero(output * (batch_target - 1))
@@ -184,6 +195,7 @@ class Transformer_Graph():
                     train_writer = tf.summary.FileWriter(hp.log_file + 'train', sess.graph)
                     test_writer = tf.summary.FileWriter(hp.log_file + 'test')
                     sess.run(tf.global_variables_initializer())
+                    sess.run(tf.local_variables_initializer())
 
                     max_batchsize = self.train_size // hp.batch_size
                     epoch_i = 1
@@ -193,18 +205,26 @@ class Transformer_Graph():
                         #print('train_targets_batch',train_targets_batch)
                         if (batch_i % max_batchsize) + 1 == max_batchsize:
                             epoch_i += 1
+                            self.acc_count = 0
+                            self.acc_true = 0
+                            self.loss_sum = 0
                             if epoch_i >= hp.epochs:
                                 break
 
                         # Training step
                         with tf.name_scope('loss'):
-                            summary, _, enc1_,enc2_,enc3_,logits_, loss, logloss_, preds_, train_acc = sess.run(
-                                [merged, train_op, enc1,enc2,enc3,logits, cost, logloss, preds, acc],
+                            summary, _, enc1_,enc2_,enc3_,logits_, loss, logloss_, preds_, _,train_acc,align_score_ = sess.run(
+                                [merged, train_op, enc1,enc2,enc3,logits, cost, logloss, preds, acc,acc_op,align_score],
                                 {input_data_logdesignid_enc: pad_enc_logdesignid_batch,
                                  batch_target: train_targets_batch,
                                  is_training:True,
                                  batch_time:train_times_batch
                                  })
+                            self.acc_count  += len(train_targets_batch)
+                            xx = [np.argmax(i) for i in train_targets_batch]
+                            yy = [np.argmax(i) for i in preds_]
+                            self.acc_true += sum([xx[i]==yy[i] for i in range(0,len(xx))])
+                            self.loss_sum += loss
                             # print('enc1',enc1_.shape)
                             # print('enc2',enc2_.shape)
                             # print('enc3',enc3_.shape)
@@ -220,8 +240,8 @@ class Transformer_Graph():
                             (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs) = next(test_generator)
 
                             # Calculate validation cost
-                            summary, validation_loss, validation_acc = sess.run(
-                                [merged, cost, acc],
+                            summary, validation_loss,_, validation_acc = sess.run(
+                                [merged, cost, acc,acc_op],
                                 {input_data_logdesignid_enc: pad_enc_valid_logdesignid_batch,
                                  batch_target: valid_targets_batchs,
                                  is_training:False,
@@ -229,17 +249,16 @@ class Transformer_Graph():
                                  })
 
                             test_writer.add_summary(summary, batch_i)
+                            if(batch_i%30==0):
+                                print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f}'
+                                      .format(epoch_i,
+                                              hp.epochs,
+                                              (batch_i % max_batchsize) + 1,
+                                              max_batchsize,
+                                              (0.0+self.loss_sum)/self.acc_count,
+                                              (0.0+self.acc_true)/self.acc_count,
+                                              ))
 
-                            print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f}  - Validation loss: {:>6.3f}  - Validation acc: {:>6.3f}'
-                                  .format(epoch_i,
-                                          hp.epochs,
-                                          (batch_i % max_batchsize) + 1,
-                                          max_batchsize,
-                                          loss,
-                                          train_acc,
-                                          validation_loss,
-                                          validation_acc
-                                          ))
 
                         if ((batch_i % max_batchsize) + 1) % hp.saver_step == 0:
                             saver = tf.train.Saver()
@@ -285,14 +304,14 @@ if __name__ == '__main__':
 
     # train_size = countsize(train_dataset_file)
     # test_size = countsize(test_dataset_file)
-    train_size = 100000
-    test_size = 100000
+    train_size = 72449
+    test_size = 30084
 
     print('train_size', train_size)
     print('test_size', test_size)
 
-    transformer_trian = Transformer_Graph(is_training = True,train_size = train_size)
-    transformer_trian.run()
+    transformer_trainn = Transformer_Graph(is_training = True,train_size = train_size)
+    transformer_trainn.run()
 
     stop = time.time()
     print("模型训练时间: " + str(stop - start) + "秒")
