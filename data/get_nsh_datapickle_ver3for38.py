@@ -28,6 +28,7 @@ if __name__ == '__main__':
 
     file = open('dataset/savefile_time_train1.txt','r')
     final_time=[]
+    final_time_raw=[]
     count=0
     for line in file.readlines():
         count=count+1
@@ -40,6 +41,7 @@ if __name__ == '__main__':
             continue
         for i in range(len(data)-YUZHI+1):
             L = data[i:i+YUZHI-1]
+            final_time_raw.append(L[:])
             L = [abs(x- L[-1]) for x in L]
             final_time.append([float(float(x)/(max(L)+0.00001)) for x in L][:])
             #final_time.append(L)
@@ -50,6 +52,7 @@ if __name__ == '__main__':
     print(len(final_label),len(final_time))
     pickle.dump(final_data, open('all_datatrain_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_time, open('all_timetrain_seq'+str(YUZHI)+'.pkl', "wb"))
+    pickle.dump(final_time_raw, open('all_timetrain_raw_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_label, open('all_labeltrain_seq'+str(YUZHI)+'.pkl', "wb"))
 
 
@@ -75,6 +78,7 @@ if __name__ == '__main__':
 
     file = open('dataset/savefile_time_test1.txt','r')
     final_time=[]
+    final_time_raw=[]
     count=0
     for line in file.readlines():
         count=count+1
@@ -87,6 +91,7 @@ if __name__ == '__main__':
             continue
         for i in range(len(data)-YUZHI+1):
             L = data[i:i+YUZHI-1]
+            final_time_raw.append(L[:])
             L = [abs(x- L[-1]) for x in L]
             final_time.append([float(float(x)/(max(L)+0.00001)) for x in L][:])
             #final_time.append(L)
@@ -96,4 +101,5 @@ if __name__ == '__main__':
     print(len(final_data),len(final_time))
     pickle.dump(final_data, open('all_datatest_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_time, open('all_timetest_seq'+str(YUZHI)+'.pkl', "wb"))
+    pickle.dump(final_time_raw, open('all_timetest_raw_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_label, open('all_labeltest_seq'+str(YUZHI)+'.pkl', "wb"))

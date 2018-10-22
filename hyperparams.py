@@ -53,7 +53,7 @@ class Hyperparams:
     display_step = 1  # Check training loss after every display_step batches
     saver_step = 1000
     output_unit=38
-    print_model = transformer_model_file+'epoch1batch%s.ckpt'%(str(saver_step))
+    print_model = transformer_model_file+'epoch20batch%s.ckpt'%(str(saver_step))
 
 #FILE_PATH = '/home/zhongqian/yuyi-prediction-dataset/nsh2/newplayer/'
     FILE_PATH = 'data/'
@@ -64,9 +64,11 @@ class Hyperparams:
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'
     Time_file_train = FILE_PATH + 'all_timetrain_seq' + str(maxlen + 1) + '.pkl'
+    Time_file_train_raw = FILE_PATH + 'all_timetrain_raw_seq' + str(maxlen + 1) + '.pkl'
     y_file_train = FILE_PATH + 'all_labeltrain_seq' + str(maxlen + 1) + '.pkl'
     X_file_test = FILE_PATH + 'all_datatest_seq' + str(maxlen + 1) + '.pkl'
     Time_file_test = FILE_PATH + 'all_timetest_seq' + str(maxlen + 1) + '.pkl'
+    Time_file_test_raw = FILE_PATH + 'all_timetest_raw_seq' + str(maxlen + 1) + '.pkl'
     y_file_test = FILE_PATH + 'allt_labeltest_seq' + str(maxlen + 1) + '.pkl'
 
 

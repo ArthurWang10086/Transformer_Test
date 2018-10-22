@@ -40,14 +40,14 @@ if __name__ == '__main__':
     if datatype == 'train':
         X_file = open(hp.X_file_train, 'rb')
         x_list = pickle.load(X_file)
-        Time_file = open(hp.Time_file_train, 'rb')
+        Time_file = open(hp.Time_file_train_raw, 'rb')
         Time_list = pickle.load(Time_file)
         y_file = open(hp.y_file_train, 'rb')
         y_list = pickle.load(y_file)
     else:
         X_file = open(hp.X_file_test, 'rb')
         x_list = pickle.load(X_file)
-        Time_file = open(hp.Time_file_test, 'rb')
+        Time_file = open(hp.Time_file_test_raw, 'rb')
         Time_list = pickle.load(Time_file)
         y_file = open(hp.y_file_test, 'rb')
         y_list = pickle.load(y_file)
