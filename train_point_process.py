@@ -297,11 +297,12 @@ class Transformer_Graph():
                                 {input_data_logdesignid_enc: pad_enc_valid_logdesignid_batch,
                                  batch_target: valid_targets_batchs,
                                  is_training:False,
-                                 batch_time:valid_times_batchs
+                                 batch_time:valid_times_batchs,
+                                 batch_time_label:valid_times_label_batchs
                                  })
                             self.acc_count_test  += len(valid_targets_batchs)
                             yy = np.argmax(lambda_all,axis=1)
-                            xx = train_targets_batch
+                            xx = valid_targets_batchs
                             # yy = [np.argmax(i) for i in preds_]
                             self.acc_true_test += sum([xx[i]==yy[i] for i in range(0,len(xx))])
                             self.loss_sum_test += loss
