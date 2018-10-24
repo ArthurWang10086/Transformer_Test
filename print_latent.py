@@ -55,7 +55,7 @@ if __name__ == '__main__':
     X_ndarray = np.array(x_list)
     Time_ndarray = np.array(Time_list)
     y_ndarray = np_utils.to_categorical(y_list, hp.output_unit)
-    (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs) = (x_list[:100], y_ndarray[:100], Time_ndarray[:100])
+    (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs) = (x_list, y_ndarray, Time_ndarray)
 
     enc1_,enc2_,enc3_,logits_ = p.predict([pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs])
     L=[]

@@ -48,6 +48,7 @@ class Hyperparams:
     dropout_rate = 0.1
     epochs = 50
     sinusoid = False
+    exp_constant = 20
 
     # other
     display_step = 1  # Check training loss after every display_step batches
@@ -64,11 +65,13 @@ class Hyperparams:
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'
     Time_file_train = FILE_PATH + 'all_timetrain_seq' + str(maxlen + 1) + '.pkl'
+    Time_file_train_label = FILE_PATH + 'all_timetrain_label_seq' + str(maxlen + 1) + '.pkl'
     Time_file_train_raw = FILE_PATH + 'all_timetrain_raw_seq' + str(maxlen + 1) + '.pkl'
     y_file_train = FILE_PATH + 'all_labeltrain_seq' + str(maxlen + 1) + '.pkl'
     X_file_test = FILE_PATH + 'all_datatest_seq' + str(maxlen + 1) + '.pkl'
     Time_file_test = FILE_PATH + 'all_timetest_seq' + str(maxlen + 1) + '.pkl'
+    Time_file_test_label = FILE_PATH + 'all_timetest_label_seq' + str(maxlen + 1) + '.pkl'
     Time_file_test_raw = FILE_PATH + 'all_timetest_raw_seq' + str(maxlen + 1) + '.pkl'
-    y_file_test = FILE_PATH + 'allt_labeltest_seq' + str(maxlen + 1) + '.pkl'
+    y_file_test = FILE_PATH + 'all_labeltest_seq' + str(maxlen + 1) + '.pkl'
 
 

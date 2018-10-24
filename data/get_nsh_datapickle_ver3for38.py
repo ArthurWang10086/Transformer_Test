@@ -28,6 +28,7 @@ if __name__ == '__main__':
 
     file = open('dataset/savefile_time_train1.txt','r')
     final_time=[]
+    final_time_label=[]
     final_time_raw=[]
     count=0
     for line in file.readlines():
@@ -42,8 +43,8 @@ if __name__ == '__main__':
         for i in range(len(data)-YUZHI+1):
             L = data[i:i+YUZHI-1]
             final_time_raw.append(L[:])
-            L = [abs(x- L[-1]) for x in L]
-            final_time.append([float(float(x)/(max(L)+0.00001)) for x in L][:])
+            final_time_label.append((data[i+YUZHI-1]-L[0])/10000.0)
+            final_time.append([(x-L[0])/10000.0 for x in L][:])
             #final_time.append(L)
         if len(final_time)>70000:
             break
@@ -52,6 +53,7 @@ if __name__ == '__main__':
     print(len(final_label),len(final_time))
     pickle.dump(final_data, open('all_datatrain_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_time, open('all_timetrain_seq'+str(YUZHI)+'.pkl', "wb"))
+    pickle.dump(final_time_label, open('all_timetrain_label_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_time_raw, open('all_timetrain_raw_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_label, open('all_labeltrain_seq'+str(YUZHI)+'.pkl', "wb"))
 
@@ -78,6 +80,7 @@ if __name__ == '__main__':
 
     file = open('dataset/savefile_time_test1.txt','r')
     final_time=[]
+    final_time_label=[]
     final_time_raw=[]
     count=0
     for line in file.readlines():
@@ -92,8 +95,8 @@ if __name__ == '__main__':
         for i in range(len(data)-YUZHI+1):
             L = data[i:i+YUZHI-1]
             final_time_raw.append(L[:])
-            L = [abs(x- L[-1]) for x in L]
-            final_time.append([float(float(x)/(max(L)+0.00001)) for x in L][:])
+            final_time_label.append((data[i+YUZHI-1]-L[0])/10000.0)
+            final_time.append([(x-L[0])/10000.0 for x in L][:])
             #final_time.append(L)
         if len(final_time)>30000:
             break
@@ -101,5 +104,6 @@ if __name__ == '__main__':
     print(len(final_data),len(final_time))
     pickle.dump(final_data, open('all_datatest_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_time, open('all_timetest_seq'+str(YUZHI)+'.pkl', "wb"))
+    pickle.dump(final_time_label, open('all_timetest_label_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_time_raw, open('all_timetest_raw_seq'+str(YUZHI)+'.pkl', "wb"))
     pickle.dump(final_label, open('all_labeltest_seq'+str(YUZHI)+'.pkl', "wb"))

@@ -308,6 +308,31 @@ def multihead_attention_time_mask(queries, keys, num_units=None, num_heads=4, dr
 
     return outputs2,outputs
 
+def point_process(context,is_training=False):
+    b = tf.Variable(tf.random_uniform([38, 1], -1.0, 1.0))
+    Wt = tf.Variable(tf.random_uniform([38, 1], -1.0, 1.0))
+    Wh = tf.Variable(tf.random_uniform([38, hp.maxlen*hp.hidden_units, 1], -1.0, 1.0))
+
+    #(-1,maxlen,hidden_units)
+    #print(tf.shape(context))
+    context = tf.reshape(context,[-1,hp.maxlen*hp.hidden_units])
+    context = tf.expand_dims(context,1)
+    #(-1,38,maxlen*hidden_units)
+    context = tf.tile(context,[1,38,1])
+    lambda_all_0 = tf.squeeze(tf.matmul(tf.expand_dims(context,-1),tf.tile(tf.expand_dims(Wh,0),[tf.shape(context)[0],1,1,1]),transpose_a=True),-1) +b
+
+
+def point_process_loss(batch_y,batch_t,lambda_all_0,Wt):
+
+    loss_time = tf.log(tf.reduce_sum(tf.exp(lambda_all_0+tf.matmul(batch_t,Wt,transpose_b=True)),axis=0))
+    #loss_time = tf.scan(lambda a,t: tf.log(tf.reduce_sum(tf.exp(lambda_all_0+tf.multiply(Wt,t)),axis=0)),batch_t)
+
+    loss_event = tf.reduce_sum(tf.scan(lambda a,(event,t): tf.multiply((tf.exp(lambda_all_0+tf.multiply(Wt,t))[event]-tf.exp(lambda_all_0)[event]),1/Wt[event]), (batch_y,batch_t)),axis=1)
+    return tf.reduce_sum(loss_time-loss_event)
+
+
+
+
 def label_smoothing(inputs, epsilon=0.1):
     K = inputs.get_shape().as_list()[-1] # number of channels
     return ((1-epsilon) * inputs) + (epsilon / K)
