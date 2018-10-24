@@ -44,7 +44,8 @@ if __name__ == '__main__':
             L = data[i:i+YUZHI-1]
             final_time_raw.append(L[:])
             final_time_label.append((data[i+YUZHI-1]-L[0])/10000.0)
-            final_time.append([(x-L[0])/10000.0 for x in L][:])
+            #final_time.append([(x-L[0])/10000.0 for x in L][:])
+            final_time.append([float(x-L[0])/max(L) for x in L][:])
             #final_time.append(L)
         if len(final_time)>70000:
             break
@@ -96,7 +97,8 @@ if __name__ == '__main__':
             L = data[i:i+YUZHI-1]
             final_time_raw.append(L[:])
             final_time_label.append((data[i+YUZHI-1]-L[0])/10000.0)
-            final_time.append([(x-L[0])/10000.0 for x in L][:])
+            #final_time.append([(x-L[0])/10000.0 for x in L][:])
+            final_time.append([float(x-L[0])/max(L) for x in L][:])
             #final_time.append(L)
         if len(final_time)>30000:
             break
