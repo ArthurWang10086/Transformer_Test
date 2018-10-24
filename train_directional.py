@@ -56,19 +56,24 @@ class Transformer_Graph():
         y_ndarray = np_utils.to_categorical(y_list, hp.output_unit)   #根据Loss定
         count = 0
 
+        shuffleIndex0 = np.random.permutation(len(y_ndarray))
+
         while (1):
             if (count+1)*hp.batch_size < X_ndarray.shape[0]:
-                pad_enc_logdesignid_batch = X_ndarray[count*hp.batch_size:(count+1)*hp.batch_size,:]
-                batch_time = Time_ndarray[count*hp.batch_size:(count+1)*hp.batch_size,:]
-                batch_target = y_ndarray[count*hp.batch_size:(count+1)*hp.batch_size,:]
+                pad_enc_logdesignid_batch = X_ndarray[shuffleIndex0][count*hp.batch_size:(count+1)*hp.batch_size,:]
+                batch_time = Time_ndarray[shuffleIndex0][count*hp.batch_size:(count+1)*hp.batch_size,:]
+                batch_target = y_ndarray[shuffleIndex0][count*hp.batch_size:(count+1)*hp.batch_size,:]
                 count = count + 1
             else:
                 count=0
-                pad_enc_logdesignid_batch = X_ndarray[count * hp.batch_size:(count + 1) * hp.batch_size, :]
-                batch_time = Time_ndarray[count * hp.batch_size:(count + 1) * hp.batch_size, :]
-                batch_target = y_ndarray[count * hp.batch_size:(count + 1) * hp.batch_size, :]
+                pad_enc_logdesignid_batch = X_ndarray[shuffleIndex0][count * hp.batch_size:(count + 1) * hp.batch_size, :]
+                batch_time = Time_ndarray[shuffleIndex0][count * hp.batch_size:(count + 1) * hp.batch_size, :]
+                batch_target = y_ndarray[shuffleIndex0][count * hp.batch_size:(count + 1) * hp.batch_size, :]
+                shuffleIndex0 = np.random.permutation(len(y_ndarray))
 
-            yield pad_enc_logdesignid_batch, batch_target, batch_time
+            shuffleIndex = np.random.permutation(len(batch_target))
+
+            yield pad_enc_logdesignid_batch[shuffleIndex], batch_target[shuffleIndex], batch_time[shuffleIndex]
 
     def transformer(self,enc_embed_input,action_length,target,time,issin = False,is_training=True):
         # Encoder

@@ -222,7 +222,7 @@ def multihead_attention_time(queries, keys, num_units=None, num_heads=4, dropout
     return outputs2,outputs
 
 def multihead_attention_time_mask(queries, keys, num_units=None, num_heads=4, dropout_rate=0, is_training=True,
-                             causality=False, scope="multihead_attention", reuse=None, T_input=None):
+                             causality=True, scope="multihead_attention", reuse=None, T_input=None):
     with tf.variable_scope(scope, reuse=reuse):
         # Set the fall back option for num_units
         if num_units is None:
@@ -260,6 +260,7 @@ def multihead_attention_time_mask(queries, keys, num_units=None, num_heads=4, dr
         # Causality = Future blinding
         if causality:
             diag_vals = tf.ones_like(outputs[0, :, :])  # (T_q, T_k)
+            #########Causality=True#########
             tril = tf.contrib.linalg.LinearOperatorLowerTriangular(diag_vals).to_dense()  # (T_q, T_k)
             masks = tf.tile(tf.expand_dims(tril, 0), [tf.shape(outputs)[0], 1, 1])  # (h*N, T_q, T_k)
 
@@ -275,26 +276,13 @@ def multihead_attention_time_mask(queries, keys, num_units=None, num_heads=4, dr
         query_masks = tf.tile(tf.expand_dims(query_masks, -1), [1, 1, tf.shape(keys)[1]])  # (h*N, T_q, T_k)
         outputs *= query_masks  # broadcasting. (N, T_q, C)
 
-        #新加MASK
-        M = np.tri(int(hp.maxlen))
-        M = tf.reshape(M, (1, M.shape[0], M.shape[1]))
-        print('shape2:', outputs.shape, outputs.shape,M.shape)
-        M = tf.cast(M, tf.float32)
-        M = tf.tile(M,[tf.shape(outputs)[0],1,1])
-        #print('aaaaaaaaaaaaaaaaaaaaaa-------------------:', type(M), M.shape)
-        M = tf.reshape(M,(-1,M.shape[2],M.shape[2]))
-        #print('aaaaaaaaaaaaaaaaaaaaaa-------------------:',type(M),M.shape)
-        outputs2 = tf.multiply(outputs, M)
-        print(tf.shape(outputs2))
-        print(tf.shape(queries))
-
         # Dropouts
         #outputs2 = tf.layers.dropout(outputs, rate=dropout_rate, training=tf.convert_to_tensor(is_training))
 
         # Weighted sum
         # outputs2=tf.transpose(outputs2, perm=[0,2,1,3])
 
-        outputs2 = tf.matmul(outputs2, V_)  # ( h*N, T_q, C/h)
+        outputs2 = tf.matmul(outputs, V_)  # ( h*N, T_q, C/h)
         print(tf.shape(outputs2))
 
         # Restore shape
