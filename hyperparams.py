@@ -35,18 +35,14 @@ class Hyperparams:
     log_file_dir = 'log/train_log.log'
 
     # training
-    batch_size = 16
-    learning_rate = 0.001
 
     # model
     vocab_size = 1000
-    maxlen = 10  # max length of Pad Sequence
     min_cnt = 3  # words whose occurred less than min_cnt are encoded as <UNK>.
     hidden_units = 16
     num_blocks = 3  # number of encoder/decoder blocks
     num_heads = 8
     dropout_rate = 0.1
-    epochs = 20
     train_size = 72449
     test_size = 30084
     sinusoid = False
@@ -55,15 +51,50 @@ class Hyperparams:
     # other
     display_step = 1  # Check training loss after every display_step batches
     saver_step = 1000
-    output_unit=38
     print_model = transformer_model_file+'epoch20batch%s.ckpt'%(str(saver_step))
 
 #FILE_PATH = '/home/zhongqian/yuyi-prediction-dataset/nsh2/newplayer/'
-    FILE_PATH = 'data/'
     #normal_dataset_file_train = '/home/luoyifan/dataset/nsh/sanhuangua/transformer/v_3/dataset/normal_train/'
     #plug_dataset_file_train = '/home/luoyifan/dataset/nsh/sanhuangua/transformer/v_3/dataset/plugin_train/'
     #normal_dataset_file_test = '/home/luoyifan/dataset/nsh/sanhuangua/transformer/v_3/dataset/normal_test/'
     #plug_dataset_file_test = '/home/luoyifan/dataset/nsh/sanhuangua/transformer/v_3/dataset/plugin_test/'
+
+    ########################mimic mimic mimic mimic#################
+    # output_unit=76
+    # # training
+    # batch_size = 4
+    # learning_rate = 0.001
+    # maxlen = 3
+    # FILE_PATH = '../data/mimic/'
+    # epochs = 50
+
+    ########################mimic_fold mimic_fold mimic_fold mimic_fold#################
+    # output_unit=76
+    # # training
+    # batch_size = 4
+    # learning_rate = 0.001
+    # maxlen = 3
+    # FILE_PATH = '../data/mimic_fold/'
+    # epochs = 30
+
+
+    ########################so so so so#################
+    # output_unit=23
+    # batch_size = 16
+    # learning_rate = 0.001
+    # maxlen = 3  # max length of Pad Sequence
+    # FILE_PATH = '../data/so/'
+    # epochs = 10
+
+
+    ########################nsh nsh nsh nsh#################
+    output_unit=38
+    batch_size = 16
+    learning_rate = 0.001
+    maxlen = 10  # max length of Pad Sequence
+    FILE_PATH = '../data/'
+    epochs = 20
+
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'
     Time_file_train = FILE_PATH + 'all_timetrain_seq' + str(maxlen + 1) + '.pkl'
