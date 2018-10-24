@@ -42,7 +42,6 @@ class Hyperparams:
     num_blocks = 3  # number of encoder/decoder blocks
     num_heads = 8
     dropout_rate = 0.1
-    epochs = 50
     sinusoid = False
 
     # other
@@ -57,6 +56,7 @@ class Hyperparams:
     # learning_rate = 0.001
     # maxlen = 3
     # FILE_PATH = '../data/mimic/'
+    # epochs = 50
 
 ########################so so so so#################
     output_unit=23
@@ -64,6 +64,7 @@ class Hyperparams:
     learning_rate = 0.001
     maxlen = 3  # max length of Pad Sequence
     FILE_PATH = '../data/so/'
+    epochs = 10
 
 
 ########################nsh nsh nsh nsh#################
@@ -72,6 +73,7 @@ class Hyperparams:
     # learning_rate = 0.001
     # maxlen = 10  # max length of Pad Sequence
     # FILE_PATH = '../data/'
+    # epochs = 50
 
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'
