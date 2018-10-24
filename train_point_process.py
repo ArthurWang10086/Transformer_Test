@@ -305,7 +305,7 @@ class Transformer_Graph():
                             self.loss_sum_test += loss
 
                             test_writer.add_summary(summary, batch_i)
-                            if(batch_i%30==0 or batch_i > max_batchsize-3):
+                            if(batch_i%30==0 or (batch_i % max_batchsize) > max_batchsize-3):
                                 print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}'
                                       .format(epoch_i,
                                               hp.epochs,
