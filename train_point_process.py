@@ -24,6 +24,7 @@ class Transformer_Graph():
         self.acc_count_test = 0
         self.acc_true_test = 0
         self.loss_sum = 0
+        self.loss_sum_test = 0
 
     def get_model_inputs(self):
         with tf.name_scope('inputs'):
@@ -254,6 +255,9 @@ class Transformer_Graph():
                             self.acc_count = 0
                             self.acc_true = 0
                             self.loss_sum = 0
+                            self.acc_count_test = 0
+                            self.acc_true_test = 0
+                            self.loss_sum_test = 0
                             if epoch_i >= hp.epochs:
                                 break
 
@@ -286,17 +290,21 @@ class Transformer_Graph():
                             (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs, valid_times_label_batchs) = next(test_generator)
 
                             # Calculate validation cost
-                            summary, validation_loss, = sess.run(
-                                [merged, cost],
+                            summary, _, enc1_,enc2_,enc3_,logits_, loss, logloss_, preds_, _,train_acc,align_score_ = sess.run(
+                                [merged, train_op, enc1,enc2,enc3,logits, cost, logloss, preds, acc,acc_op,align_score],
                                 {input_data_logdesignid_enc: pad_enc_valid_logdesignid_batch,
                                  batch_target: valid_targets_batchs,
                                  is_training:False,
-                                 batch_time: valid_times_batchs,
-                                 batch_time_label: valid_times_label_batchs
+                                 batch_time:valid_times_batchs
                                  })
+                            self.acc_count_test  += len(valid_targets_batchs)
+                            xx = [np.argmax(i) for i in valid_targets_batchs]
+                            yy = [np.argmax(i) for i in preds_]
+                            self.acc_true_test += sum([xx[i]==yy[i] for i in range(0,len(xx))])
+                            self.loss_sum_test += loss
 
                             test_writer.add_summary(summary, batch_i)
-                            if(batch_i%30==0):
+                            if(batch_i%30==0 or batch_i > max_batchsize-3):
                                 print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f}'
                                       .format(epoch_i,
                                               hp.epochs,
