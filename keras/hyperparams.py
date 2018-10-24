@@ -52,13 +52,13 @@ class Hyperparams:
     print_model = transformer_model_file+'epoch20batch%s.ckpt'%(str(saver_step))
 
 ########################mimic mimic mimic mimic#################
-    output_unit=76
-    # training
-    batch_size = 4
-    learning_rate = 0.001
-    maxlen = 3
-    FILE_PATH = '../data/mimic/'
-    epochs = 50
+    # output_unit=76
+    # # training
+    # batch_size = 4
+    # learning_rate = 0.001
+    # maxlen = 3
+    # FILE_PATH = '../data/mimic/'
+    # epochs = 50
 
 ########################so so so so#################
     # output_unit=23
@@ -70,12 +70,12 @@ class Hyperparams:
 
 
 ########################nsh nsh nsh nsh#################
-    # output_unit=38
-    # batch_size = 16
-    # learning_rate = 0.001
-    # maxlen = 10  # max length of Pad Sequence
-    # FILE_PATH = '../data/'
-    # epochs = 50
+    output_unit=38
+    batch_size = 16
+    learning_rate = 0.001
+    maxlen = 10  # max length of Pad Sequence
+    FILE_PATH = '../data/'
+    epochs = 20
 
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'
