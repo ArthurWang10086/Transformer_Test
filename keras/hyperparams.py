@@ -43,6 +43,8 @@ class Hyperparams:
     num_heads = 8
     dropout_rate = 0.1
     sinusoid = False
+    intra_op_parallelism_threads = 5
+    inter_op_parallelism_threads = 5
 
     # other
     display_step = 1  # Check training loss after every display_step batches

@@ -14,6 +14,7 @@ import sys
 from keras import backend as K
 from hyperparams import Hyperparams as hp
 import tensorflow as tf
+from keras.backend.tensorflow_backend import set_session
 
 #python transformer_nsh_ver3 299 40
 if __name__ == '__main__':
@@ -23,6 +24,9 @@ if __name__ == '__main__':
     maxlen=hp.maxlen
     #OUTPUT_UNIT = 299
     FILE_PATH=hp.FILE_PATH
+
+    config = tf.ConfigProto(intra_op_parallelism_threads=hp.intra_op_parallelism_threads,inter_op_parallelism_threads=hp.inter_op_parallelism_threads)
+    set_session(tf.Session(config=config))
 
 
     from keras.models import Model
