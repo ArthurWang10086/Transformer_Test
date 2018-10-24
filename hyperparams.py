@@ -47,6 +47,8 @@ class Hyperparams:
     num_heads = 8
     dropout_rate = 0.1
     epochs = 50
+    train_size = 72449
+    test_size = 30084
     sinusoid = False
     exp_constant = 20
 

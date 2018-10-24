@@ -24,6 +24,7 @@ class Transformer_Graph():
         self.acc_count_test = 0
         self.acc_true_test = 0
         self.loss_sum = 0
+        self.loss_sum_test = 0
 
     def get_model_inputs(self):
         with tf.name_scope('inputs'):
@@ -117,7 +118,7 @@ class Transformer_Graph():
                                               num_heads=hp.num_heads,
                                               dropout_rate=hp.dropout_rate,
                                               is_training=self.is_training,
-                                              causality=False,T_input=time)
+                                              T_input=time)
                     enc2 = feedforward(enc1, num_units=[4 * hp.hidden_units, hp.hidden_units])
 
         with tf.variable_scope("softmax"):
@@ -213,6 +214,9 @@ class Transformer_Graph():
                             self.acc_count = 0
                             self.acc_true = 0
                             self.loss_sum = 0
+                            self.acc_count_test = 0
+                            self.acc_true_test = 0
+                            self.loss_sum_test = 0
                             if epoch_i >= hp.epochs:
                                 break
 
@@ -245,25 +249,31 @@ class Transformer_Graph():
                             (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs) = next(test_generator)
 
                             # Calculate validation cost
-                            summary, validation_loss,_, validation_acc = sess.run(
-                                [merged, cost, acc,acc_op],
+                            summary, _, enc1_,enc2_,enc3_,logits_, loss, logloss_, preds_, _,train_acc,align_score_ = sess.run(
+                                [merged, train_op, enc1,enc2,enc3,logits, cost, logloss, preds, acc,acc_op,align_score],
                                 {input_data_logdesignid_enc: pad_enc_valid_logdesignid_batch,
                                  batch_target: valid_targets_batchs,
                                  is_training:False,
-                                 batch_time: valid_times_batchs
+                                 batch_time:valid_times_batchs
                                  })
+                            self.acc_count_test  += len(valid_targets_batchs)
+                            xx = [np.argmax(i) for i in valid_targets_batchs]
+                            yy = [np.argmax(i) for i in preds_]
+                            self.acc_true_test += sum([xx[i]==yy[i] for i in range(0,len(xx))])
+                            self.loss_sum_test += loss
 
                             test_writer.add_summary(summary, batch_i)
                             if(batch_i%30==0):
-                                print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f}'
+                                print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}'
                                       .format(epoch_i,
                                               hp.epochs,
                                               (batch_i % max_batchsize) + 1,
                                               max_batchsize,
                                               (0.0+self.loss_sum)/self.acc_count,
                                               (0.0+self.acc_true)/self.acc_count,
+                                              (0.0+self.loss_sum_test)/self.acc_count_test,
+                                              (0.0+self.acc_true_test)/self.acc_count_test
                                               ))
-
 
                         if ((batch_i % max_batchsize) + 1) % hp.saver_step == 0:
                             saver = tf.train.Saver()
@@ -309,8 +319,8 @@ if __name__ == '__main__':
 
     # train_size = countsize(train_dataset_file)
     # test_size = countsize(test_dataset_file)
-    train_size = 72449
-    test_size = 30084
+    train_size = hp.train_size
+    test_size = hp.test_size
 
     print('train_size', train_size)
     print('test_size', test_size)

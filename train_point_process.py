@@ -124,7 +124,7 @@ class Transformer_Graph():
                                               num_heads=hp.num_heads,
                                               dropout_rate=hp.dropout_rate,
                                               is_training=self.is_training,
-                                              causality=False,T_input=time)
+                                              T_input=time)
                     enc2 = feedforward(enc1, num_units=[4 * hp.hidden_units, hp.hidden_units])
 
         with tf.variable_scope("point_process"):
@@ -358,8 +358,8 @@ if __name__ == '__main__':
 
     # train_size = countsize(train_dataset_file)
     # test_size = countsize(test_dataset_file)
-    train_size = 72449
-    test_size = 30084
+    train_size = hp.train_size
+    test_size = hp.test_size
 
     print('train_size', train_size)
     print('test_size', test_size)
