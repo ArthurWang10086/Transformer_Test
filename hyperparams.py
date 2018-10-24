@@ -46,7 +46,7 @@ class Hyperparams:
     num_blocks = 3  # number of encoder/decoder blocks
     num_heads = 8
     dropout_rate = 0.1
-    epochs = 50
+    epochs = 20
     train_size = 72449
     test_size = 30084
     sinusoid = False
