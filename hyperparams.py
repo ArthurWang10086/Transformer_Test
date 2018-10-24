@@ -65,7 +65,7 @@ class Hyperparams:
     # batch_size = 4
     # learning_rate = 0.001
     # maxlen = 3
-    # FILE_PATH = '../data/mimic/'
+    # FILE_PATH = 'data/mimic/'
     # epochs = 50
 
     ########################mimic_fold mimic_fold mimic_fold mimic_fold#################
@@ -74,7 +74,7 @@ class Hyperparams:
     # batch_size = 4
     # learning_rate = 0.001
     # maxlen = 3
-    # FILE_PATH = '../data/mimic_fold/'
+    # FILE_PATH = 'data/mimic_fold/'
     # epochs = 30
 
 
@@ -83,7 +83,7 @@ class Hyperparams:
     # batch_size = 16
     # learning_rate = 0.001
     # maxlen = 3  # max length of Pad Sequence
-    # FILE_PATH = '../data/so/'
+    # FILE_PATH = 'data/so/'
     # epochs = 10
 
 
@@ -92,7 +92,7 @@ class Hyperparams:
     batch_size = 16
     learning_rate = 0.001
     maxlen = 10  # max length of Pad Sequence
-    FILE_PATH = '../data/'
+    FILE_PATH = 'data/'
     epochs = 20
 
 
