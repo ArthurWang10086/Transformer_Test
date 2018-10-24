@@ -35,6 +35,8 @@ class Hyperparams:
     log_file_dir = 'log/train_log.log'
 
     # training
+    inter_op_parallelism_threads=5
+    intra_op_parallelism_threads=5
 
     # model
     vocab_size = 1000

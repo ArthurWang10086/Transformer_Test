@@ -238,6 +238,8 @@ class Transformer_Graph():
                 checkpoint = hp.transformer_model_file + "best_model.ckpt"
 
                 with tf.Session(graph=self.graph) as sess:
+                    config = tf.ConfigProto(inter_op_parallelism_threads=hp.inter_op_parallelism_threads,intra_op_parallelism_threads=hp.intra_op_parallelism_threads)
+                    sess = tf.Session(config=config)
                     merged = tf.summary.merge_all()
                     train_writer = tf.summary.FileWriter(hp.log_file + 'train', sess.graph)
                     test_writer = tf.summary.FileWriter(hp.log_file + 'test')
