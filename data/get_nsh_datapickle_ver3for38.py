@@ -6,7 +6,7 @@ from hyperparams import Hyperparams as hp
 import os
 
 if __name__ == '__main__':
-    YUZHI=int(hp.maxlen)+1
+    YUZHI=10+1
     file = open('dataset/savefile_event_train1.txt','r')
     final_data=[]
     final_label=[]
