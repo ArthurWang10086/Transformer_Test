@@ -59,11 +59,11 @@ if __name__ == '__main__':
 
 
             print(len(final_label),len(final_time))
-            pickle.dump(final_data, open('all_datatrain_seq'+str(YUZHI)+'.pkl.'+FOLD[fold_num], "wb"))
-            pickle.dump(final_time, open('all_timetrain_seq'+str(YUZHI)+'.pkl.'+FOLD[fold_num], "wb"))
-            pickle.dump(final_time_label, open('all_timetrain_label_seq'+str(YUZHI)+'.pkl.'+FOLD[fold_num], "wb"))
-            pickle.dump(final_time_raw, open('all_timetrain_raw_seq'+str(YUZHI)+'.pkl.'+FOLD[fold_num], "wb"))
-            pickle.dump(final_label, open('all_labeltrain_seq'+str(YUZHI)+'.pkl.'+FOLD[fold_num], "wb"))
+            pickle.dump(final_data, open('all_data%s_seq'%(name)+str(YUZHI)+'.pkl.'+FOLD[fold_num], "wb"))
+            pickle.dump(final_time, open('all_time%s_seq'%(name)+str(YUZHI)+'.pkl.'+FOLD[fold_num], "wb"))
+            pickle.dump(final_time_label, open('all_time%s_label_seq'%(name)+str(YUZHI)+'.pkl.'+FOLD[fold_num], "wb"))
+            pickle.dump(final_time_raw, open('all_time%s_raw_seq'%(name)+str(YUZHI)+'.pkl.'+FOLD[fold_num], "wb"))
+            pickle.dump(final_label, open('all_label%s_seq'%(name)+str(YUZHI)+'.pkl.'+FOLD[fold_num], "wb"))
 
 
 

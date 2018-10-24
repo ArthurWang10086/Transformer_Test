@@ -15,6 +15,7 @@ from keras import backend as K
 from hyperparams import Hyperparams as hp
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
+from util_runformimic import util_runformimic
 
 #python transformer_nsh_ver3 299 40
 if __name__ == '__main__':
@@ -69,7 +70,11 @@ if __name__ == '__main__':
                   metrics=['accuracy'])
 
     model.summary()
-
+    if 'fold' in hp.FILE_PATH:
+        util_runformimic(model)
+        exit(0)
+    else:
+        pass
     print('Train...')
 
     X_file = open(FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl', 'rb')

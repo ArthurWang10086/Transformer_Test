@@ -70,6 +70,13 @@ if __name__ == '__main__':
 
     model.summary()
 
+    if 'fold' in hp.FILE_PATH:
+        from util_runformimic import  util_runformimic
+        util_runformimic(model)
+        exit(0)
+    else:
+        pass
+
     print('Train...')
 
     X_file = open(FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl', 'rb')
