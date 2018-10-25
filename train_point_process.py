@@ -154,10 +154,10 @@ class Transformer_Graph():
             Wd = tf.Variable(tf.random_uniform([hp.output_unit, hp.maxlen], -1.0, 1.0))
             Wh = tf.Variable(tf.random_uniform([hp.output_unit, hp.maxlen*hp.hidden_units, 1], -1.0, 1.0))
 
-            context = tf.reshape(enc2,[-1,hp.maxlen*hp.hidden_units])  #(-1,maxlen,hidden_units)
+            context = tf.reshape(enc2,[-1,hp.maxlen*hp.hidden_units])  #enc2 shape:(-1,maxlen,hidden_units)
             context = tf.expand_dims(context,1)
             context = tf.tile(context,[1,hp.output_unit,1])#(-1,38,maxlen*hidden_units)
-            #除了wt*t之外的项相加    [batch_size,output_unit]
+            #除了wt*t之外的项相加   lambda_all_0 shape[batch_size,output_unit]
             lambda_all_0 = tf.squeeze(tf.squeeze(tf.matmul(tf.expand_dims(context,-1),tf.tile(tf.expand_dims(Wh,0),[tf.shape(context)[0],1,1,1]),transpose_a=True),-1) +b,-1) \
                             +tf.squeeze(tf.matmul(tf.tile(tf.expand_dims(Wd,0),[tf.shape(context)[0],1,1]),tf.expand_dims(time_gap,-1)),-1)
 
