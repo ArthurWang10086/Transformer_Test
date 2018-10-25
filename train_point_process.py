@@ -150,7 +150,7 @@ class Transformer_Graph():
             #enc2    [batch_size,hp.maxlen,hp.hidden_units]
 
             b = tf.Variable(tf.random_uniform([hp.output_unit, 1], -1.0, 1.0))
-            Wt = tf.Variable(tf.random_uniform([hp.output_unit, 1], -1.0, 1.0))
+            Wt = tf.Variable(tf.random_uniform([hp.output_unit, 1], 0.0, 1.0))
             Wd = tf.Variable(tf.random_uniform([hp.output_unit, hp.maxlen], -1.0, 1.0))
             Wh = tf.Variable(tf.random_uniform([hp.output_unit, hp.maxlen*hp.hidden_units, 1], -1.0, 1.0))
 
@@ -288,8 +288,9 @@ class Transformer_Graph():
                                               (0.0+self.acc_true_test)/self.acc_count_test
                                               ))
                                 num=300
+                                time_maximum=0.2
                                 batch_num = len(train_targets_batch)
-                                t_ = np.linspace(0, 1, num=num)
+                                t_ = np.linspace(0, time_maximum, num=num)
                                 t_ = np.tile(np.reshape(t_,[1,-1,1]),[batch_num,1,1])#(16,1000,1)
 
                                 loss_event_part_wt_ = np.matmul(t_,np.transpose(Wt_*hp.time_scale))#(16,1000,38)
@@ -304,7 +305,7 @@ class Transformer_Graph():
                                 temp = np.exp(np.sum(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-1/(Wt_*hp.time_scale)),axis=(2,3)))#(16,1000)
 
                                 # print(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)).shape)
-                                time_pred_ = np.average(np.multiply(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)),t_),(1,2))
+                                time_pred_ = time_maximum * np.average(np.multiply(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)),t_),(1,2))
 
                                 # print('Wt',Wt_[0])
                                 # print('prob1',np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1)[0][-1])
@@ -314,8 +315,8 @@ class Transformer_Graph():
                                 # print('t',t_[0][0])
                                 # print('Wt_',Wt_[0])
                                 #
-                                # print('pred',time_pred_)
-                                # print('true',train_times_label_batch)
+                                print('pred',time_pred_)
+                                print('true',train_times_label_batch)
 
 
                         if ((batch_i % max_batchsize) + 1) % hp.saver_step == 0:
