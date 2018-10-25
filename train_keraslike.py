@@ -84,13 +84,13 @@ class Transformer_Graph():
 
             enc = embedding(enc_embed_input,
                             vocab_size=action_length,
-                            num_units=hp.hidden_units,
+                            num_units=32,
                             scale=True,
                             scope='enc_embed')
             if issin:
                 # Position Encoding
                 enc += positional_encoding(enc_embed_input,
-                                           num_units=hp.hidden_units,
+                                           num_units=32,
                                            scale=False,
                                            scope="enc_pe")
             else:
@@ -114,12 +114,13 @@ class Transformer_Graph():
                     ### Multihead Attention
                     enc1,align_score = multihead_attention(queries=enc,
                                               keys=enc,
-                                              num_units=hp.hidden_units,
+                                              num_units=32,
                                               num_heads=hp.num_heads,
                                               dropout_rate=hp.dropout_rate,
                                               is_training=self.is_training,
                                               T_input=time)
-                    enc2 = feedforward(enc1, num_units=[4 * hp.hidden_units, hp.hidden_units])
+                    enc2=enc1
+                    #enc2 = feedforward(enc1, num_units=[4 * hp.hidden_units, hp.hidden_units])
 
         with tf.variable_scope("softmax"):
 
@@ -127,8 +128,14 @@ class Transformer_Graph():
             # print('------------------enc_shape',enc.get_shape())
             enc3=enc2
             flatten = tf.contrib.layers.flatten(enc3)
-            print('------------------enc_shape', flatten.get_shape())
+            flatten = tf.layers.dropout(flatten,
+                                        rate=hp.dropout_rate,
+                                        training=tf.convert_to_tensor(self.is_training))
+            flatten = tf.layers.dense(flatten, hp.output_unit,activation=tf.nn.relu)
             #enc = tf.reshape(enc,[hp.batch_size,(hp.maxlen+1)*(hp.hidden_units/4)])
+            flatten = tf.layers.dropout(flatten,
+                                    rate=hp.dropout_rate,
+                                    training=tf.convert_to_tensor(self.is_training))
             logits = tf.layers.dense(flatten, hp.output_unit,activation=tf.nn.softmax)
         # print('enc,logits shape:',enc.get_shape(),logits.get_shape())
 
@@ -248,23 +255,23 @@ class Transformer_Graph():
 
                         # Debug message updating us on the status of the training
                         if batch_i % hp.display_step == 0:
-                            (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs) = next(test_generator)
-
-                            # Calculate validation cost
-                            summary, _, enc1_,enc2_,enc3_,logits_, loss, logloss_, preds_, _,train_acc,align_score_ = sess.run(
-                                [merged, train_op, enc1,enc2,enc3,logits, cost, logloss, preds, acc,acc_op,align_score],
-                                {input_data_logdesignid_enc: pad_enc_valid_logdesignid_batch,
-                                 batch_target: valid_targets_batchs,
-                                 is_training:False,
-                                 batch_time:valid_times_batchs
-                                 })
-                            self.acc_count_test  += len(valid_targets_batchs)
-                            xx = [np.argmax(i) for i in valid_targets_batchs]
-                            yy = [np.argmax(i) for i in preds_]
-                            self.acc_true_test += sum([xx[i]==yy[i] for i in range(0,len(xx))])
-                            self.loss_sum_test += loss
-
-                            test_writer.add_summary(summary, batch_i)
+                            # (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs) = next(test_generator)
+                            #
+                            # # Calculate validation cost
+                            # summary, _, enc1_,enc2_,enc3_,logits_, loss, logloss_, preds_, _,train_acc,align_score_ = sess.run(
+                            #     [merged, train_op, enc1,enc2,enc3,logits, cost, logloss, preds, acc,acc_op,align_score],
+                            #     {input_data_logdesignid_enc: pad_enc_valid_logdesignid_batch,
+                            #      batch_target: valid_targets_batchs,
+                            #      is_training:False,
+                            #      batch_time:valid_times_batchs
+                            #      })
+                            # self.acc_count_test  += len(valid_targets_batchs)
+                            # xx = [np.argmax(i) for i in valid_targets_batchs]
+                            # yy = [np.argmax(i) for i in preds_]
+                            # self.acc_true_test += sum([xx[i]==yy[i] for i in range(0,len(xx))])
+                            # self.loss_sum_test += loss
+                            #
+                            # test_writer.add_summary(summary, batch_i)
                             if(batch_i%30==0 or (batch_i % max_batchsize) > max_batchsize-3):
                                 print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}'
                                       .format(epoch_i,
@@ -273,15 +280,15 @@ class Transformer_Graph():
                                               max_batchsize,
                                               (0.0+self.loss_sum)/self.acc_count,
                                               (0.0+self.acc_true)/self.acc_count,
-                                              (0.0+self.loss_sum_test)/self.acc_count_test,
-                                              (0.0+self.acc_true_test)/self.acc_count_test
+                                              (0.0+self.loss_sum_test)/(self.acc_count_test+1),
+                                              (0.0+self.acc_true_test)/(self.acc_count_test+1)
                                               ))
 
-                        if ((batch_i % max_batchsize) + 1) % hp.saver_step == 0:
-                            saver = tf.train.Saver()
-                            saver.save(sess, os.path.join(os.getcwd(),
-                                                          hp.transformer_model_file + "epoch" + str(epoch_i) + "batch" + str(
-                                                              (batch_i % max_batchsize) + 1) + ".ckpt"))
+                        # if ((batch_i % max_batchsize) + 1) % hp.saver_step == 0:
+                        #     saver = tf.train.Saver()
+                        #     saver.save(sess, os.path.join(os.getcwd(),
+                        #                                   hp.transformer_model_file + "epoch" + str(epoch_i) + "batch" + str(
+                        #                                       (batch_i % max_batchsize) + 1) + ".ckpt"))
 
                     # Save Model
                     saver = tf.train.Saver()

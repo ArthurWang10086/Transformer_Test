@@ -38,7 +38,8 @@ def embedding(inputs, vocab_size, num_units, scale=True, scope="embedding", reus
 
 def positional_encoding(inputs, num_units, scale=True, scope="positional_encoding", reuse=None):
     inputs = tf.convert_to_tensor(inputs, np.int32)
-    N, T = inputs.get_shape().as_list()  # N:32,T:length
+    N=hp.batch_size  # N:32,T:length
+    T = hp.maxlen
 
     with tf.variable_scope(scope, reuse=reuse):
         position_ind = tf.tile(tf.expand_dims(tf.range(T), 0), [N, 1])

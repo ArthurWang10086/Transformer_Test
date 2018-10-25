@@ -44,7 +44,7 @@ class Hyperparams:
     hidden_units = 16
     num_blocks = 1  # number of encoder/decoder blocks
     num_heads = 8
-    dropout_rate = 0.1
+    dropout_rate = 0.2
     sinusoid = False
     exp_constant = 20
 
