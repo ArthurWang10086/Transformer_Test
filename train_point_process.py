@@ -31,11 +31,12 @@ class Transformer_Graph():
             # input_data_logdesignid_enc = tf.placeholder(tf.int32, [hp.batch_size, hp.maxlen+1], name='input_logdesignid_enc')
             input_data_logdesignid_enc = tf.placeholder(tf.int32, [None, hp.maxlen],name='input_logdesignid_enc')
             time = tf.placeholder(tf.float32, [None, hp.maxlen],name='times')
+            time_gap = tf.placeholder(tf.float32, [None, hp.maxlen],name='time_gap')
             target = tf.placeholder(tf.float32, [None], name='targets')
             time_label = tf.placeholder(tf.float32, [None], name='time_label')
             is_training = tf.placeholder(tf.bool, name='is_training')
 
-        return input_data_logdesignid_enc, target, is_training, time , time_label
+        return input_data_logdesignid_enc, target, is_training, time , time_label, time_gap
 
     def generator_batches(self,datatype):
         if datatype == 'train':
@@ -43,6 +44,8 @@ class Transformer_Graph():
             x_list = pickle.load(X_file)
             Time_file = open(hp.Time_file_train, 'rb')
             Time_list = pickle.load(Time_file)
+            Time_gap_file = open(hp.Time_gap_file_train, 'rb')
+            Time_gap_list = pickle.load(Time_gap_file)
             Time_file_label = open(hp.Time_file_train_label, 'rb')
             Time_list_label = pickle.load(Time_file_label)
             y_file = open(hp.y_file_train, 'rb')
@@ -52,6 +55,8 @@ class Transformer_Graph():
             x_list = pickle.load(X_file)
             Time_file = open(hp.Time_file_test, 'rb')
             Time_list = pickle.load(Time_file)
+            Time_gap_file = open(hp.Time_gap_file_test, 'rb')
+            Time_gap_list = pickle.load(Time_gap_file)
             Time_file_label = open(hp.Time_file_test_label, 'rb')
             Time_list_label = pickle.load(Time_file_label)
             y_file = open(hp.y_file_test, 'rb')
@@ -59,6 +64,7 @@ class Transformer_Graph():
 
         X_ndarray = np.array(x_list)
         Time_ndarray = np.array(Time_list)
+        Time_ndarray_gap = np.array(Time_gap_list)
         Time_ndarray_label = np.array(Time_list_label)
         y_ndarray = np.array(y_list)   #根据Loss定
         count = 0
@@ -68,6 +74,7 @@ class Transformer_Graph():
             if (count+1)*hp.batch_size < X_ndarray.shape[0]:
                 pad_enc_logdesignid_batch = X_ndarray[shuffleIndex0][count*hp.batch_size:(count+1)*hp.batch_size,:]
                 batch_time = Time_ndarray[shuffleIndex0][count*hp.batch_size:(count+1)*hp.batch_size,:]
+                batch_time_gap = Time_ndarray_gap[shuffleIndex0][count*hp.batch_size:(count+1)*hp.batch_size,:]
                 batch_target = y_ndarray[shuffleIndex0][count*hp.batch_size:(count+1)*hp.batch_size]
                 batch_time_label = Time_ndarray_label[shuffleIndex0][count*hp.batch_size:(count+1)*hp.batch_size]
                 count = count + 1
@@ -75,15 +82,16 @@ class Transformer_Graph():
                 count=0
                 pad_enc_logdesignid_batch = X_ndarray[shuffleIndex0][count * hp.batch_size:(count + 1) * hp.batch_size, :]
                 batch_time = Time_ndarray[shuffleIndex0][count * hp.batch_size:(count + 1) * hp.batch_size, :]
+                batch_time_gap = Time_ndarray_gap[shuffleIndex0][count * hp.batch_size:(count + 1) * hp.batch_size, :]
                 batch_target = y_ndarray[shuffleIndex0][count * hp.batch_size:(count + 1) * hp.batch_size]
                 batch_time_label = Time_ndarray_label[shuffleIndex0][count * hp.batch_size:(count + 1) * hp.batch_size]
                 shuffleIndex0 = np.random.permutation(len(y_ndarray))
 
             shuffleIndex = np.random.permutation(len(batch_target))
 
-            yield pad_enc_logdesignid_batch[shuffleIndex], batch_target[shuffleIndex], batch_time[shuffleIndex], batch_time_label[shuffleIndex]
+            yield pad_enc_logdesignid_batch[shuffleIndex], batch_target[shuffleIndex], batch_time[shuffleIndex], batch_time_label[shuffleIndex], batch_time_gap[shuffleIndex]
 
-    def transformer(self,enc_embed_input,action_length,target,time,issin = False,is_training=True):
+    def transformer(self,enc_embed_input,action_length,target,time,time_gap,issin = False,is_training=True):
         # Encoder
         # Embedding
         print('[transformer_model] enc_input', enc_embed_input.get_shape())
@@ -114,7 +122,6 @@ class Transformer_Graph():
                 enc = tf.layers.dropout(enc,
                                         rate=hp.dropout_rate,
                                         training=tf.convert_to_tensor(self.is_training))
-            time = time
             ## Blocks
             for i in range(hp.num_blocks):
                 with tf.variable_scope("num_blocks_{}".format(i)):
@@ -137,14 +144,22 @@ class Transformer_Graph():
             #print('------------------enc_shape', flatten.get_shape())
             #enc = tf.reshape(enc,[hp.batch_size,(hp.maxlen+1)*(hp.hidden_units/4)])
             #logits = tf.layers.dense(flatten, hp.output_unit,activation=tf.nn.softmax)
-            b = tf.Variable(tf.random_uniform([38, 1], -1.0, 1.0))
-            Wt = tf.Variable(tf.random_uniform([38, 1], -1.0, 1.0))
-            Wh = tf.Variable(tf.random_uniform([38, hp.maxlen*hp.hidden_units, 1], -1.0, 1.0))
+
+
+            #shape
+            #enc2    [batch_size,hp.maxlen,hp.hidden_units]
+
+            b = tf.Variable(tf.random_uniform([hp.output_unit, 1], -1.0, 1.0))
+            Wt = tf.Variable(tf.random_uniform([hp.output_unit, 1], -1.0, 1.0))
+            Wd = tf.Variable(tf.random_uniform([hp.output_unit, hp.maxlen], -1.0, 1.0))
+            Wh = tf.Variable(tf.random_uniform([hp.output_unit, hp.maxlen*hp.hidden_units, 1], -1.0, 1.0))
 
             context = tf.reshape(enc2,[-1,hp.maxlen*hp.hidden_units])  #(-1,maxlen,hidden_units)
             context = tf.expand_dims(context,1)
-            context = tf.tile(context,[1,38,1])#(-1,38,maxlen*hidden_units)
-            lambda_all_0 = tf.squeeze(tf.squeeze(tf.matmul(tf.expand_dims(context,-1),tf.tile(tf.expand_dims(Wh,0),[tf.shape(context)[0],1,1,1]),transpose_a=True),-1) +b,-1)
+            context = tf.tile(context,[1,hp.output_unit,1])#(-1,38,maxlen*hidden_units)
+            #除了wt*t之外的项相加    [batch_size,output_unit]
+            lambda_all_0 = tf.squeeze(tf.squeeze(tf.matmul(tf.expand_dims(context,-1),tf.tile(tf.expand_dims(Wh,0),[tf.shape(context)[0],1,1,1]),transpose_a=True),-1) +b,-1) \
+                            +tf.squeeze(tf.matmul(tf.tile(tf.expand_dims(Wd,0),[tf.shape(context)[0],1,1]),tf.expand_dims(time_gap,-1)),-1)
 
 
 
@@ -156,79 +171,37 @@ class Transformer_Graph():
         #self.action_length = len(self.id2action)
 
         with self.graph.as_default():
-            input_data_logdesignid_enc, batch_target, is_training, batch_time, batch_time_label = self.get_model_inputs()
+            input_data_logdesignid_enc, batch_target, is_training, batch_time, batch_time_label, batch_time_gap = self.get_model_inputs()
 
             with tf.name_scope("optimization"):
                 # Create the training and inference logits
-                enc1,enc2,enc3,logits,align_score,lambda_all_0,Wt = self.transformer(input_data_logdesignid_enc,hp.output_unit,batch_target,batch_time)
+                enc1,enc2,enc3,logits,align_score,lambda_all_0,Wt = self.transformer(input_data_logdesignid_enc,hp.output_unit,batch_target,batch_time, batch_time_gap)
                 tf.add_to_collection('latent_enc1', enc1)
                 tf.add_to_collection('latent_enc2', enc2)
                 tf.add_to_collection('latent_enc3', enc3)
                 tf.add_to_collection('latent_logits', logits)
-                # Predicr label
-                # preds = tf.nn.sigmoid(logits)
-                # preds = logits
-                # print('[transformer_model] logits', logits.get_shape())
-                # print('[transformer_model] logits', logits)
-                # print('=======================================')
-                #
-                # print('[transformer_model] preds', preds.get_shape())
-                # print('[transformer_model] preds', preds)
-                # print('=======================================')
-                #loss_time = tf.scan(lambda a,t: tf.log(tf.reduce_sum(tf.exp(lambda_all_0+tf.multiply(Wt,t)),axis=0)),batch_time_label)
-                loss_time_part_lambda_all = tf.exp((lambda_all_0+tf.matmul(tf.expand_dims(batch_time_label,-1),Wt,transpose_b=True))/hp.exp_constant)
-                loss_time_part_index = tf.range(0,tf.shape(batch_target)[0])*hp.output_unit+tf.cast(batch_target,tf.int32)
-                loss_time = tf.log(tf.reshape(tf.gather(tf.reshape(loss_time_part_lambda_all,[-1]),loss_time_part_index),[tf.shape(batch_target)[0]]))
+                #shape
+                #lambda_all_0  [batch_size,output_unit]
+                #loss_time_part_index   [batch_size*output_unit]
+                #loss_event_part_wt [batch_size,output_unit]
+                #loss_event [batch_size,]
+                #cost         [1]
 
-                #()[event]-tf.exp(lambda_all_0)[event]
-                # tf.gather_nd(tf.exp(lambda_all_0+tf.matmul(batch_time_label,Wt,transpose_b=True),batch_target)
-                # tf.gather_nd(tf.transpose(tf.exp(lambda_all_0),perm=[1,0,2]),batch_target)
-                loss_event_part_wt = tf.matmul(tf.expand_dims(batch_time_label,-1),Wt,transpose_b=True)
-                loss_event_part_lambda_all = tf.exp((lambda_all_0+loss_event_part_wt)/hp.exp_constant)
-                #loss_event_part_index = tf.range(0,tf.shape(batch_target)[0])*hp.output_unit+tf.cast(batch_target,tf.int32)
-                #loss_event_part_1 = tf.expand_dims(loss_event_part_lambda_all-tf.exp(lambda_all_0),-1)
-                #loss_event_part_2 = tf.multiply(loss_event_part_1,1/Wt)
-                loss_event_part_1 = loss_event_part_lambda_all
-                loss_event_part_2 = tf.exp(lambda_all_0/hp.exp_constant)
-                loss_event = tf.reduce_sum(tf.multiply(tf.expand_dims(loss_event_part_lambda_all-tf.exp(lambda_all_0/hp.exp_constant),-1),1/Wt),axis=[1,2])
 
-                #loss_event_part_1 =  tf.reshape(tf.gather(tf.reshape(loss_event_part_lambda_all,[-1]),loss_event_part_index),[tf.shape(batch_target)[0]])
-                #loss_event_part_2 = tf.reshape(tf.gather(tf.reshape(tf.exp(lambda_all_0),[-1]),loss_event_part_index),[tf.shape(batch_target)[0]])
-                #print(tf.reshape(tf.gather(tf.reshape(loss_event_part_lambda_all,[-1]),loss_event_part_index),[tf.shape(batch_target)[0]]).get_shape())
-                #loss_event =  loss_event_part_1-loss_event_part_2
-                #loss_event = tf.reduce_sum(tf.scan(lambda a,(event,t): tf.multiply(),1/Wt[event]), (batch_target,batch_time_label)),axis=1)
-                cost = -tf.reduce_mean(loss_time-loss_event)
+                loss_event_part_lambda_all = tf.exp((lambda_all_0+tf.matmul(tf.expand_dims(batch_time_label,-1),Wt,transpose_b=True))/hp.exp_constant)
+                loss_event_part_index = tf.range(0,tf.shape(batch_target)[0])*hp.output_unit+tf.cast(batch_target,tf.int32)
+                #取出未来事件yj的条件概率
+                loss_event = tf.log(tf.reshape(tf.gather(tf.reshape(loss_event_part_lambda_all,[-1]),loss_event_part_index),[tf.shape(batch_target)[0]]))
 
-                # Loss
-                #logloss = tf.nn.softmax_cross_entropy_with_logits(labels=batch_target, logits=logits)
-                # logloss = tf.nn.sigmoid_cross_entropy_with_logits(labels=batch_target, logits=logits)
-                #cost = tf.reduce_mean(logloss)
+                loss_time_part_wt = tf.matmul(tf.expand_dims(batch_time_label,-1),Wt,transpose_b=True)
+                #计算lambda
+                loss_time_part_lambda_all = tf.exp((lambda_all_0+loss_time_part_wt)/hp.exp_constant)
+                loss_time_part_1 = loss_time_part_lambda_all
+                loss_time_part_2 = tf.exp(lambda_all_0/hp.exp_constant)
+                loss_time = tf.reduce_sum(tf.multiply(tf.expand_dims(loss_time_part_lambda_all-tf.exp(lambda_all_0/hp.exp_constant),-1),1/Wt),axis=[1,2])
 
-                #output = preds
-                # acc, acc_op = tf.metrics.accuracy(labels=tf.argmax(batch_target),
-                #                                   predictions=tf.argmax(logits))
-
-                #acc = tf.reduce_mean(tf.to_float(tf.equal(tf.argmax(preds),tf.argmax(batch_target))))
-                #acc_op =acc
-                # TP = tf.count_nonzero(output * batch_target)
-                # TN = tf.count_nonzero((output - 1) * (batch_target - 1))
-                # FP = tf.count_nonzero(output * (batch_target - 1))
-                # FN = tf.count_nonzero((output - 1) * batch_target)
-                # precision = tf.divide(TP, tf.add(TP, FP))
-                # recall = tf.divide(TP, tf.add(TP, FN))
-                # f1 = tf.divide(tf.multiply(tf.constant(2.0,dtype=tf.float64), tf.multiply(precision, recall)), tf.add(precision, recall))
-
-                # Summary
+                cost = -tf.reduce_mean(loss_event-loss_time)
                 tf.summary.scalar('loss', cost)
-                #tf.summary.scalar('acc', acc)
-                # tf.summary.scalar('precision', precision)
-                # tf.summary.scalar('recall', recall)
-                # tf.summary.scalar('f1', f1)
-
-                # Loss function
-                print('[model_train] targets', batch_target.get_shape())
-                #batch_target_smooth = label_smoothing(batch_target)
-                #print('[model_train] targets smoth',batch_target_smooth.get_shape())
 
                 # Optimizer
                 global_steps = tf.Variable(0, name='global_step', trainable=False)
@@ -238,8 +211,8 @@ class Transformer_Graph():
                 checkpoint = hp.transformer_model_file + "best_model.ckpt"
 
                 with tf.Session(graph=self.graph) as sess:
-                    config = tf.ConfigProto(inter_op_parallelism_threads=hp.inter_op_parallelism_threads,intra_op_parallelism_threads=hp.intra_op_parallelism_threads)
-                    sess = tf.Session(config=config)
+                    # config = tf.ConfigProto(inter_op_parallelism_threads=hp.inter_op_parallelism_threads,intra_op_parallelism_threads=hp.intra_op_parallelism_threads)
+                    # sess = tf.Session(config=config)
                     merged = tf.summary.merge_all()
                     train_writer = tf.summary.FileWriter(hp.log_file + 'train', sess.graph)
                     test_writer = tf.summary.FileWriter(hp.log_file + 'test')
@@ -249,9 +222,7 @@ class Transformer_Graph():
                     max_batchsize = self.train_size // hp.batch_size
                     epoch_i = 1
                     test_generator = self.generator_batches(datatype='test')
-                    for batch_i, (pad_enc_logdesignid_batch, train_targets_batch, train_times_batch, train_times_label_batch) in enumerate(self.generator_batches(datatype='train')):
-                        #print('train_targets_batch',pad_enc_logdesignid_batch)
-                        #print('train_targets_batch',train_targets_batch)
+                    for batch_i, (pad_enc_logdesignid_batch, train_targets_batch, train_times_batch, train_times_label_batch,train_times_gap_batch) in enumerate(self.generator_batches(datatype='train')):
                         if (batch_i % max_batchsize) + 1 == max_batchsize:
                             epoch_i += 1
                             self.acc_count = 0
@@ -265,31 +236,26 @@ class Transformer_Graph():
 
                         # Training step
                         with tf.name_scope('loss'):
-                            summary, _, enc1_,enc2_,enc3_,logits_, loss,loss_time_,loss_event_,loss_event_part_1_,loss_event_part_2_, lambda_all = sess.run(
-                                [merged, train_op, enc1,enc2,enc3,logits, cost,loss_time,loss_event,loss_event_part_1,loss_event_part_2,loss_event_part_lambda_all],
+                            summary, _, enc1_,enc2_,enc3_,logits_, loss,loss_time_,loss_event_,Wt_,lambda_all_0_, lambda_all = sess.run(
+                                [merged, train_op, enc1,enc2,enc3,logits, cost,loss_time,loss_event,Wt,lambda_all_0,loss_event_part_lambda_all],
                                 {input_data_logdesignid_enc: pad_enc_logdesignid_batch,
                                  batch_target: train_targets_batch,
                                  is_training:True,
                                  batch_time:train_times_batch,
-                                 batch_time_label:train_times_label_batch
+                                 batch_time_label:train_times_label_batch,
+                                 batch_time_gap:train_times_gap_batch
                                  })
                             self.acc_count  += len(train_targets_batch)
                             yy = np.argmax(lambda_all,axis=1)
                             xx = train_targets_batch
-                            # yy = [np.argmax(i) for i in preds_]
                             self.acc_true += sum([xx[i]==yy[i] for i in range(0,len(xx))])
                             self.loss_sum += loss
-                            # print('train_times_batch',train_times_batch)
-                            # print('logits',logits_.shape)
-                            #print('logloss',logloss_)
-                            #print('cost_',loss)
-                            #print('preds_',preds_)
 
                             train_writer.add_summary(summary, batch_i)
 
                         # Debug message updating us on the status of the training
                         if batch_i % hp.display_step == 0:
-                            (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs, valid_times_label_batchs) = next(test_generator)
+                            (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs, valid_times_label_batchs, valid_times_gap_batchs) = next(test_generator)
 
                             # Calculate validation cost
                             summary, _, enc1_,enc2_,enc3_,logits_, loss,loss_time_,loss_event_,loss_event_part_1_,loss_event_part_2_, lambda_all = sess.run(
@@ -298,8 +264,10 @@ class Transformer_Graph():
                                  batch_target: valid_targets_batchs,
                                  is_training:False,
                                  batch_time:valid_times_batchs,
-                                 batch_time_label:valid_times_label_batchs
+                                 batch_time_label:valid_times_label_batchs,
+                                 batch_time_gap:valid_times_gap_batchs
                                  })
+
                             self.acc_count_test  += len(valid_targets_batchs)
                             yy = np.argmax(lambda_all,axis=1)
                             xx = valid_targets_batchs
@@ -319,13 +287,16 @@ class Transformer_Graph():
                                               (0.0+self.loss_sum_test)/self.acc_count_test,
                                               (0.0+self.acc_true_test)/self.acc_count_test
                                               ))
-                                # print('pred:',yy)
-                                # print('true:',xx)
-                                # print('loss_time:',loss_time_)
-                                # print('loss_event:',loss_event_)
-                                # print('loss_event_part_1:',loss_event_part_1_[0])
-                                # print('loss_event_part_2:',loss_event_part_2_[0])
-                                #print('enc2',enc2_.shape)
+                                # num=1000
+                                # batch_num = len(train_targets_batch)
+                                # t_ = np.linspace(0, 0.03, num=num)
+                                # t_ = np.tile(np.reshape(t_,[1,-1,1]),[batch_num,1,1])
+                                # loss_event_part_wt_ = np.matmul(t_,np.transpose(Wt_))
+                                # lambda_all_0_ = np.tile(np.expand_dims(lambda_all_0_,1),[1,num,1])
+                                # loss_event_part_lambda_all_ = np.exp((lambda_all_0_+loss_event_part_wt_)/hp.exp_constant)
+                                # time_pred_ = np.average(np.multiply(np.sum(loss_event_part_lambda_all_,axis=2),np.squeeze(t_,-1)),axis=1)
+                                # print(time_pred_)
+                                # print(train_times_label_batch)
 
 
                         if ((batch_i % max_batchsize) + 1) % hp.saver_step == 0:
@@ -370,8 +341,6 @@ if __name__ == '__main__':
     log_file = hp.log_file
     dir_check(log_file)
 
-    # train_size = countsize(train_dataset_file)
-    # test_size = countsize(test_dataset_file)
     train_size = hp.train_size
     test_size = hp.test_size
 

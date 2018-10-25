@@ -42,7 +42,7 @@ class Hyperparams:
     vocab_size = 1000
     min_cnt = 3  # words whose occurred less than min_cnt are encoded as <UNK>.
     hidden_units = 16
-    num_blocks = 3  # number of encoder/decoder blocks
+    num_blocks = 1  # number of encoder/decoder blocks
     num_heads = 8
     dropout_rate = 0.1
     sinusoid = False
@@ -81,34 +81,36 @@ class Hyperparams:
 
 
     ########################so so so so#################
-    output_unit=23
-    batch_size = 16
-    learning_rate = 0.001
-    maxlen = 3  # max length of Pad Sequence
-    FILE_PATH = 'data/so/'
-    epochs = 10
-    train_size = 332683
-    test_size = 121199
+    # output_unit=23
+    # batch_size = 16
+    # learning_rate = 0.001
+    # maxlen = 3  # max length of Pad Sequence
+    # FILE_PATH = 'data/so/'
+    # epochs = 10
+    # train_size = 332683
+    # test_size = 121199
 
 
     ########################nsh nsh nsh nsh#################
-    # output_unit=38
-    # batch_size = 16
-    # learning_rate = 0.001
-    # maxlen = 10  # max length of Pad Sequence
-    # FILE_PATH = 'data/'
-    # epochs = 20
-    # train_size = 72449
-    # test_size = 30084
+    output_unit=38
+    batch_size = 16
+    learning_rate = 0.001
+    maxlen = 10  # max length of Pad Sequence
+    FILE_PATH = 'data/'
+    epochs = 20
+    train_size = 72449
+    test_size = 30084
 
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'
     Time_file_train = FILE_PATH + 'all_timetrain_seq' + str(maxlen + 1) + '.pkl'
+    Time_gap_file_train = FILE_PATH + 'all_timetrain_gap_seq' + str(maxlen + 1) + '.pkl'
     Time_file_train_label = FILE_PATH + 'all_timetrain_label_seq' + str(maxlen + 1) + '.pkl'
     Time_file_train_raw = FILE_PATH + 'all_timetrain_raw_seq' + str(maxlen + 1) + '.pkl'
     y_file_train = FILE_PATH + 'all_labeltrain_seq' + str(maxlen + 1) + '.pkl'
     X_file_test = FILE_PATH + 'all_datatest_seq' + str(maxlen + 1) + '.pkl'
     Time_file_test = FILE_PATH + 'all_timetest_seq' + str(maxlen + 1) + '.pkl'
+    Time_gap_file_test = FILE_PATH + 'all_timetest_gap_seq' + str(maxlen + 1) + '.pkl'
     Time_file_test_label = FILE_PATH + 'all_timetest_label_seq' + str(maxlen + 1) + '.pkl'
     Time_file_test_raw = FILE_PATH + 'all_timetest_raw_seq' + str(maxlen + 1) + '.pkl'
     y_file_test = FILE_PATH + 'all_labeltest_seq' + str(maxlen + 1) + '.pkl'

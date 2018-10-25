@@ -19,10 +19,10 @@ class CustomPPLayer(Layer):
         super(CustomPPLayer, self).__init__(**kwargs)
 
     def build(self, input_shape):
-        self.input_spec = [InputSpec(shape=(-1,10)),InputSpec(shape=(-1,10)),InputSpec(shape=(-1,38))]
-        self.b = K.variable(self.b_init((38,1)), name='{}_b'.format(self.name))
-        self.wt = K.variable(self.wt_init((38,1)), name='{}_wt'.format(self.name))
-        self.wh = K.variable(self.wh_init((38,hp.maxlen*hp.hidden_units,1)), name='{}_wh'.format(self.name))
+        self.input_spec = [InputSpec(shape=(-1,hp.maxlen)),InputSpec(shape=(-1,hp.maxlen)),InputSpec(shape=(-1,hp.output_unit))]
+        self.b = K.variable(self.b_init((hp.output_unit,1)), name='{}_b'.format(self.name))
+        self.wt = K.variable(self.wt_init((hp.output_unit,1)), name='{}_wt'.format(self.name))
+        self.wh = K.variable(self.wh_init((hp.output_unit,hp.maxlen*hp.hidden_units,1)), name='{}_wh'.format(self.name))
         self.trainable_weights = [self.b, self.wt,self.wh]
 
     def call(self,inputs):
@@ -33,7 +33,7 @@ class CustomPPLayer(Layer):
         context = inputs[2]
         context = K.reshape(context,[-1,hp.maxlen*hp.hidden_units])
         context = K.expand_dims(context,1)
-        context = K.tile(context,[1,38,1])
+        context = K.tile(context,[1,hp.output_unit,1])
         lambda_all_0 = tf.squeeze(K.batch_dot(K.expand_dims(context,-1),K.tile(K.expand_dims(self.wh,0),[K.shape(context)[0],1,1,1]),axes=[2,2]),-1) +self.b
 
         #loss_time = tf.scan(lambda a,t: K.log(K.sum(K.exp(lambda_all_0+tf.multiply(self.wt,t[0])),axis=0)),batch_t,infer_shape=False)
