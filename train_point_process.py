@@ -188,17 +188,17 @@ class Transformer_Graph():
                 #cost         [1]
 
 
-                loss_event_part_lambda_all = tf.exp((lambda_all_0+tf.matmul(tf.expand_dims(batch_time_label,-1),Wt,transpose_b=True))/hp.exp_constant)
+                loss_event_part_lambda_all = tf.exp((lambda_all_0+tf.matmul(tf.expand_dims(batch_time_label,-1),Wt*hp.time_scale,transpose_b=True))/hp.exp_constant)
                 loss_event_part_index = tf.range(0,tf.shape(batch_target)[0])*hp.output_unit+tf.cast(batch_target,tf.int32)
                 #取出未来事件yj的条件概率
                 loss_event = tf.log(tf.reshape(tf.gather(tf.reshape(loss_event_part_lambda_all,[-1]),loss_event_part_index),[tf.shape(batch_target)[0]]))
 
-                loss_time_part_wt = tf.matmul(tf.expand_dims(batch_time_label,-1),Wt,transpose_b=True)
+                loss_time_part_wt = tf.matmul(tf.expand_dims(batch_time_label,-1),Wt*hp.time_scale,transpose_b=True)
                 #计算lambda
                 loss_time_part_lambda_all = tf.exp((lambda_all_0+loss_time_part_wt)/hp.exp_constant)
                 loss_time_part_1 = loss_time_part_lambda_all
                 loss_time_part_2 = tf.exp(lambda_all_0/hp.exp_constant)
-                loss_time = tf.reduce_sum(tf.multiply(tf.expand_dims(loss_time_part_lambda_all-tf.exp(lambda_all_0/hp.exp_constant),-1),1/Wt),axis=[1,2])
+                loss_time = tf.reduce_sum(tf.multiply(tf.expand_dims(loss_time_part_lambda_all-tf.exp(lambda_all_0/hp.exp_constant),-1),1/(Wt*hp.time_scale)),axis=[1,2])
 
                 cost = -tf.reduce_mean(loss_event-loss_time)
                 tf.summary.scalar('loss', cost)
@@ -258,8 +258,8 @@ class Transformer_Graph():
                             (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs, valid_times_label_batchs, valid_times_gap_batchs) = next(test_generator)
 
                             # Calculate validation cost
-                            summary, _, enc1_,enc2_,enc3_,logits_, loss,loss_time_,loss_event_,loss_event_part_1_,loss_event_part_2_, lambda_all = sess.run(
-                                [merged, train_op, enc1,enc2,enc3,logits, cost,loss_time,loss_event,loss_event_part_1,loss_event_part_2,loss_event_part_lambda_all],
+                            summary, _, enc1_,enc2_,enc3_,logits_, loss,loss_time_,loss_event_, lambda_all = sess.run(
+                                [merged, train_op, enc1,enc2,enc3,logits, cost,loss_time,loss_event,loss_event_part_lambda_all],
                                 {input_data_logdesignid_enc: pad_enc_valid_logdesignid_batch,
                                  batch_target: valid_targets_batchs,
                                  is_training:False,
@@ -276,7 +276,7 @@ class Transformer_Graph():
                             self.loss_sum_test += loss
 
                             test_writer.add_summary(summary, batch_i)
-                            if(batch_i%30==0 or (batch_i % max_batchsize) > max_batchsize-3):
+                            if(batch_i%300==0 or (batch_i % max_batchsize) > max_batchsize-3):
                                 print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}'
                                       .format(epoch_i,
                                               hp.epochs,
@@ -287,16 +287,35 @@ class Transformer_Graph():
                                               (0.0+self.loss_sum_test)/self.acc_count_test,
                                               (0.0+self.acc_true_test)/self.acc_count_test
                                               ))
-                                # num=1000
-                                # batch_num = len(train_targets_batch)
-                                # t_ = np.linspace(0, 0.03, num=num)
-                                # t_ = np.tile(np.reshape(t_,[1,-1,1]),[batch_num,1,1])
-                                # loss_event_part_wt_ = np.matmul(t_,np.transpose(Wt_))
-                                # lambda_all_0_ = np.tile(np.expand_dims(lambda_all_0_,1),[1,num,1])
-                                # loss_event_part_lambda_all_ = np.exp((lambda_all_0_+loss_event_part_wt_)/hp.exp_constant)
-                                # time_pred_ = np.average(np.multiply(np.sum(loss_event_part_lambda_all_,axis=2),np.squeeze(t_,-1)),axis=1)
-                                # print(time_pred_)
-                                # print(train_times_label_batch)
+                                num=300
+                                batch_num = len(train_targets_batch)
+                                t_ = np.linspace(0, 1, num=num)
+                                t_ = np.tile(np.reshape(t_,[1,-1,1]),[batch_num,1,1])#(16,1000,1)
+
+                                loss_event_part_wt_ = np.matmul(t_,np.transpose(Wt_*hp.time_scale))#(16,1000,38)
+                                print('check',t_[0][-1],(Wt_*hp.time_scale)[0][0],loss_event_part_wt_[0][-1][0])
+                                lambda_all_0_ = np.tile(np.expand_dims(lambda_all_0_,1),[1,num,1])
+                                lambda_all_ = np.exp((lambda_all_0_+loss_event_part_wt_)/hp.exp_constant)#(16,1000,38)
+
+                                # print(lambda_all_0_.shape,lambda_all_.shape)
+                                Wt_ = np.tile(np.expand_dims(Wt_,0),[num,1,1])#(1000,38,1)
+
+                                # print(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-1/Wt_).shape)
+                                temp = np.exp(np.sum(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-1/(Wt_*hp.time_scale)),axis=(2,3)))#(16,1000)
+
+                                # print(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)).shape)
+                                time_pred_ = np.average(np.multiply(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)),t_),(1,2))
+
+                                # print('Wt',Wt_[0])
+                                # print('prob1',np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1)[0][-1])
+                                # #print('prob2',np.expand_dims(np.sum(lambda_all_,2),-1)[0][:100])
+                                # print('prob2',lambda_all_0_[0][0])
+                                # print('prob2_part',loss_event_part_wt_[0][-1])
+                                # print('t',t_[0][0])
+                                # print('Wt_',Wt_[0])
+                                #
+                                # print('pred',time_pred_)
+                                # print('true',train_times_label_batch)
 
 
                         if ((batch_i % max_batchsize) + 1) % hp.saver_step == 0:

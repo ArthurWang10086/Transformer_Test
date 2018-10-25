@@ -114,5 +114,5 @@ if __name__ == '__main__':
     print('x_train shape:', x_train.shape)
     print('x_test shape:', x_test.shape)
     print('-------------------------')
-    model.fit([x_train, x_train_time], y_train,epochs=20,batch_size=BATCHSIZE,validation_data=([x_test,x_test_time], y_test))
+    model.fit([x_train, x_train_time], y_train,epochs=hp.epochs,batch_size=BATCHSIZE,validation_data=([x_test,x_test_time], y_test))
 

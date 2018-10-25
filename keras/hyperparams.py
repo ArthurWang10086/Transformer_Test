@@ -61,13 +61,13 @@ class Hyperparams:
     # epochs = 50
 
 ########################mimic_fold mimic_fold mimic_fold mimic_fold#################
-    # output_unit=76
-    # # training
-    # batch_size = 4
-    # learning_rate = 0.001
-    # maxlen = 3
-    # FILE_PATH = '../data/mimic_fold/'
-    # epochs = 30
+    output_unit=76
+    # training
+    batch_size = 4
+    learning_rate = 0.001
+    maxlen = 3
+    FILE_PATH = '../data/mimic_fold/'
+    epochs = 30
 
 
 ########################so so so so#################
@@ -80,12 +80,12 @@ class Hyperparams:
 
 
 ########################nsh nsh nsh nsh#################
-    output_unit=38
-    batch_size = 16
-    learning_rate = 0.001
-    maxlen = 10  # max length of Pad Sequence
-    FILE_PATH = '../data/'
-    epochs = 20
+    # output_unit=38
+    # batch_size = 16
+    # learning_rate = 0.001
+    # maxlen = 10  # max length of Pad Sequence
+    # FILE_PATH = '../data/'
+    # epochs = 20
 
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'

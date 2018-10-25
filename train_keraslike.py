@@ -120,7 +120,7 @@ class Transformer_Graph():
                                               is_training=self.is_training,
                                               T_input=time)
                     enc2=enc1
-                    #enc2 = feedforward(enc1, num_units=[4 * hp.hidden_units, hp.hidden_units])
+                    # enc2 = feedforward(enc1, num_units=[4 * 32, 32])
 
         with tf.variable_scope("softmax"):
 

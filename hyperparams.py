@@ -47,6 +47,7 @@ class Hyperparams:
     dropout_rate = 0.2
     sinusoid = False
     exp_constant = 20
+    time_scale = 1
 
     # other
     display_step = 1  # Check training loss after every display_step batches
@@ -81,25 +82,25 @@ class Hyperparams:
 
 
     ########################so so so so#################
-    # output_unit=23
-    # batch_size = 16
-    # learning_rate = 0.001
-    # maxlen = 3  # max length of Pad Sequence
-    # FILE_PATH = 'data/so/'
-    # epochs = 10
-    # train_size = 332683
-    # test_size = 121199
+    output_unit=23
+    batch_size = 16
+    learning_rate = 0.001
+    maxlen = 3  # max length of Pad Sequence
+    FILE_PATH = 'data/so/'
+    epochs = 10
+    train_size = 332683
+    test_size = 121199
 
 
     ########################nsh nsh nsh nsh#################
-    output_unit=38
-    batch_size = 16
-    learning_rate = 0.001
-    maxlen = 10  # max length of Pad Sequence
-    FILE_PATH = 'data/'
-    epochs = 20
-    train_size = 72449
-    test_size = 30084
+    # output_unit=38
+    # batch_size = 16
+    # learning_rate = 0.001
+    # maxlen = 10  # max length of Pad Sequence
+    # FILE_PATH = 'data/'
+    # epochs = 20
+    # train_size = 72449
+    # test_size = 30084
 
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'
