@@ -54,7 +54,7 @@ if __name__ == '__main__':
     embeddings = Embedding(max_features, 32)(S_inputs_x)
     embeddings = Position_Embedding()(embeddings) # 增加Position_Embedding能轻微提高准确率
 
-    O_seq = Attention_addnorm(8,16,S_inputs_time)([embeddings,embeddings,embeddings])
+    O_seq = Attention_addnorm(8,4,S_inputs_time)([embeddings,embeddings,embeddings])
     O_seq = Flatten()(O_seq)
     #O_seq = GlobalAveragePooling1D()(O_seq)
     O_seq = Dropout(0.2)(O_seq)
