@@ -489,18 +489,14 @@ class Attention_addnorm_direction(Layer):
         A = self.Mask(A, V_len, 'add')
         A = K.permute_dimensions(A, (0,3,2,1))
         print('shape1:',A.shape)
-        A = K.softmax(A)
-
         #新加MASK
-        M = np.tri(int(maxlen))
-        M = K.reshape(M, (1, M.shape[0], M.shape[1]))
-        print('shape2:', A.shape, V_seq.shape,M.shape)
-        M = tf.cast(M, tf.float32)
-        M = tf.tile(M,[tf.shape(A)[0]*tf.shape(A)[1],1,1])
-        M = K.reshape(M,(-1,A.shape[1],M.shape[2],M.shape[2]))
-        A = Multiply()([A, M])
+        diag_vals = tf.ones_like(A[0, 0, :, :])  # (T_q, T_k)
+        tril = tf.contrib.linalg.LinearOperatorLowerTriangular(diag_vals).to_dense()  # (T_q, T_k)
+        masks = tf.tile(tf.expand_dims(tf.expand_dims(tril, 0),0), [tf.shape(A)[0],tf.shape(A)[1], 1, 1])  # (h*N, T_q, T_k)
+        paddings = tf.ones_like(masks) * (-2 ** 32 + 1)
+        A = tf.where(tf.equal(masks, 0), paddings, A)  # (h*N, T_q, T_k)
 
-
+        A = K.softmax(A)
         #输出并mask
         O_seq = K.batch_dot(A, V_seq, axes=[3,2])
         O_seq = K.permute_dimensions(O_seq, (0,2,1,3))
