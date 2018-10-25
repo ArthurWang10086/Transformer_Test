@@ -323,7 +323,7 @@ class Attention_addnorm(Layer):
         self.size_per_head = size_per_head
         self.output_dim = nb_head*size_per_head
         self.T_input = T_inputs
-        super(Attention, self).__init__(**kwargs)
+        super(Attention_addnorm, self).__init__(**kwargs)
 
     def build(self, input_shape):
         self.WQ = self.add_weight(name='WQ',
@@ -338,7 +338,7 @@ class Attention_addnorm(Layer):
                                   shape=(input_shape[2][-1], self.output_dim),
                                   initializer='glorot_uniform',
                                   trainable=True)
-        super(Attention, self).build(input_shape)
+        super(Attention_addnorm, self).build(input_shape)
 
 
 
@@ -417,7 +417,7 @@ class Attention_addnorm_direction(Layer):
         self.size_per_head = size_per_head
         self.output_dim = nb_head*size_per_head
         self.T_input = T_inputs
-        super(Attention, self).__init__(**kwargs)
+        super(Attention_addnorm_direction, self).__init__(**kwargs)
 
     def build(self, input_shape):
         self.WQ = self.add_weight(name='WQ',
@@ -432,7 +432,7 @@ class Attention_addnorm_direction(Layer):
                                   shape=(input_shape[2][-1], self.output_dim),
                                   initializer='glorot_uniform',
                                   trainable=True)
-        super(Attention, self).build(input_shape)
+        super(Attention_addnorm_direction, self).build(input_shape)
 
 
 
