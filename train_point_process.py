@@ -198,7 +198,7 @@ class Transformer_Graph():
                 loss_time_part_lambda_all = tf.exp((lambda_all_0+loss_time_part_wt)/hp.exp_constant)
                 loss_time_part_1 = loss_time_part_lambda_all
                 loss_time_part_2 = tf.exp(lambda_all_0/hp.exp_constant)
-                loss_time = tf.reduce_sum(tf.multiply(tf.expand_dims(loss_time_part_lambda_all-tf.exp(lambda_all_0/hp.exp_constant),-1),1/(Wt*hp.time_scale)),axis=[1,2])
+                loss_time = tf.reduce_sum(tf.multiply(tf.expand_dims(loss_time_part_lambda_all-tf.exp(lambda_all_0/hp.exp_constant),-1),hp.exp_constant/(Wt*hp.time_scale)),axis=[1,2])
 
                 cost = -tf.reduce_mean(loss_event-loss_time)
                 tf.summary.scalar('loss', cost)
@@ -302,7 +302,7 @@ class Transformer_Graph():
                                 Wt_ = np.tile(np.expand_dims(Wt_,0),[num,1,1])#(1000,38,1)
 
                                 # print(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-1/Wt_).shape)
-                                temp = np.exp(np.sum(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-1/(Wt_*hp.time_scale)),axis=(2,3)))#(16,1000)
+                                temp = np.exp(np.sum(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-hp.exp_constant/(Wt_*hp.time_scale)),axis=(2,3)))#(16,1000)
 
                                 # print(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)).shape)
                                 time_pred_ = time_maximum * np.average(np.multiply(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)),t_),(1,2))
