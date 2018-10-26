@@ -239,7 +239,7 @@ class Transformer_Graph():
 
                         # Training step
                         with tf.name_scope('loss'):
-                            summary, _, enc1_,enc2_,enc3_,logits_, loss,loss_time_,loss_event_,Wt_,lambda_all_0_, lambda_all = sess.run(
+                            summary, _, enc1_,enc2_,enc3_,logits_, loss,loss_time_,loss_event_,Wt_,lambda_all_0_, lambda_all_ = sess.run(
                                 [merged, train_op, enc1,enc2,enc3,logits, cost,loss_time,loss_event,Wt,lambda_all_0,loss_event_part_lambda_all],
                                 {input_data_logdesignid_enc: pad_enc_logdesignid_batch,
                                  batch_target: train_targets_batch,
@@ -288,7 +288,7 @@ class Transformer_Graph():
                                  })
 
                             self.acc_count_test  += len(valid_targets_batchs)
-                            yy = np.argmax(lambda_all,axis=1)
+                            yy = np.argmax(lambda_all_,axis=1)
                             xx = valid_targets_batchs
                             # yy = [np.argmax(i) for i in preds_]
                             self.acc_true_test += sum([xx[i]==yy[i] for i in range(0,len(xx))])
