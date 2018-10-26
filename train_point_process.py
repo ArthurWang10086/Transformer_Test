@@ -249,7 +249,7 @@ class Transformer_Graph():
                                  batch_time_gap:train_times_gap_batch
                                  })
                             self.acc_count  += len(train_targets_batch)
-                            yy = np.argmax(lambda_all,axis=1)
+                            yy = np.argmax(lambda_all_,axis=1)
                             xx = train_targets_batch
                             self.acc_true += sum([xx[i]==yy[i] for i in range(0,len(xx))])
                             self.loss_sum += loss
