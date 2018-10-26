@@ -25,6 +25,8 @@ class Transformer_Graph():
         self.acc_true_test = 0
         self.loss_sum = 0
         self.loss_sum_test = 0
+        self.mse = 0
+        self.mse_test = 0
 
     def get_model_inputs(self):
         with tf.name_scope('inputs'):
@@ -231,6 +233,7 @@ class Transformer_Graph():
                             self.acc_count_test = 0
                             self.acc_true_test = 0
                             self.loss_sum_test = 0
+                            self.mse_test = self.mse = 0
                             if epoch_i >= hp.epochs:
                                 break
 
@@ -250,6 +253,22 @@ class Transformer_Graph():
                             xx = train_targets_batch
                             self.acc_true += sum([xx[i]==yy[i] for i in range(0,len(xx))])
                             self.loss_sum += loss
+                            num=300
+                            time_maximum=0.2
+                            batch_num = len(train_targets_batch)
+                            t_ = np.linspace(0, time_maximum, num=num)
+                            t_ = np.tile(np.reshape(t_,[1,-1,1]),[batch_num,1,1])#(16,1000,1)
+
+                            loss_event_part_wt_ = np.matmul(t_,np.transpose(Wt_*hp.time_scale))#(16,1000,38)
+                            #print('check',t_[0][-1],(Wt_*hp.time_scale)[0][0],loss_event_part_wt_[0][-1][0])
+                            lambda_all_0_ = np.tile(np.expand_dims(lambda_all_0_,1),[1,num,1])
+                            lambda_all_ = np.exp((lambda_all_0_+loss_event_part_wt_)/hp.exp_constant)#(16,1000,38)
+
+                            Wt_ = np.tile(np.expand_dims(Wt_,0),[num,1,1])#(1000,38,1)
+
+                            temp = np.exp(np.sum(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-hp.exp_constant/(Wt_*hp.time_scale)),axis=(2,3)))#(16,1000)
+                            time_pred_ = time_maximum * np.average(np.multiply(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)),t_),(1,2))
+                            self.mse += sum((time_pred_-train_times_label_batch)**2)
 
                             train_writer.add_summary(summary, batch_i)
 
@@ -258,8 +277,8 @@ class Transformer_Graph():
                             (pad_enc_valid_logdesignid_batch, valid_targets_batchs, valid_times_batchs, valid_times_label_batchs, valid_times_gap_batchs) = next(test_generator)
 
                             # Calculate validation cost
-                            summary, _, enc1_,enc2_,enc3_,logits_, loss,loss_time_,loss_event_, lambda_all = sess.run(
-                                [merged, train_op, enc1,enc2,enc3,logits, cost,loss_time,loss_event,loss_event_part_lambda_all],
+                            summary, _, enc1_,enc2_,enc3_,logits_, loss,loss_time_,loss_event_,Wt_,lambda_all_0_, lambda_all_ = sess.run(
+                                [merged, train_op, enc1,enc2,enc3,logits, cost,loss_time,loss_event,Wt,lambda_all_0,loss_event_part_lambda_all],
                                 {input_data_logdesignid_enc: pad_enc_valid_logdesignid_batch,
                                  batch_target: valid_targets_batchs,
                                  is_training:False,
@@ -275,46 +294,39 @@ class Transformer_Graph():
                             self.acc_true_test += sum([xx[i]==yy[i] for i in range(0,len(xx))])
                             self.loss_sum_test += loss
 
+                            batch_num = len(valid_targets_batchs)
+                            t_ = np.linspace(0, time_maximum, num=num)
+                            t_ = np.tile(np.reshape(t_,[1,-1,1]),[batch_num,1,1])#(16,1000,1)
+
+                            loss_event_part_wt_ = np.matmul(t_,np.transpose(Wt_*hp.time_scale))#(16,1000,38)
+                            #print('check',t_[0][-1],(Wt_*hp.time_scale)[0][0],loss_event_part_wt_[0][-1][0])
+                            lambda_all_0_ = np.tile(np.expand_dims(lambda_all_0_,1),[1,num,1])
+                            lambda_all_ = np.exp((lambda_all_0_+loss_event_part_wt_)/hp.exp_constant)#(16,1000,38)
+
+                            Wt_ = np.tile(np.expand_dims(Wt_,0),[num,1,1])#(1000,38,1)
+
+                            temp = np.exp(np.sum(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-hp.exp_constant/(Wt_*hp.time_scale)),axis=(2,3)))#(16,1000)
+                            time_pred_ = time_maximum * np.average(np.multiply(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)),t_),(1,2))
+                            self.mse_test += sum((time_pred_-valid_times_label_batchs)**2)
+
+
                             test_writer.add_summary(summary, batch_i)
                             if(batch_i%300==0 or (batch_i % max_batchsize) > max_batchsize-3):
-                                print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}'
+                                print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f}  - Train rmse: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}  - Test rmse: {:>6.3f}'
                                       .format(epoch_i,
                                               hp.epochs,
                                               (batch_i % max_batchsize) + 1,
                                               max_batchsize,
                                               (0.0+self.loss_sum)/self.acc_count,
                                               (0.0+self.acc_true)/self.acc_count,
+
+                                              np.sqrt((0.0+self.mse)/self.acc_count),
                                               (0.0+self.loss_sum_test)/self.acc_count_test,
-                                              (0.0+self.acc_true_test)/self.acc_count_test
+                                              (0.0+self.acc_true_test)/self.acc_count_test,
+
+                                              np.sqrt((0.0+self.mse_test)/self.acc_count)
                                               ))
-                                num=300
-                                time_maximum=0.2
-                                batch_num = len(train_targets_batch)
-                                t_ = np.linspace(0, time_maximum, num=num)
-                                t_ = np.tile(np.reshape(t_,[1,-1,1]),[batch_num,1,1])#(16,1000,1)
 
-                                loss_event_part_wt_ = np.matmul(t_,np.transpose(Wt_*hp.time_scale))#(16,1000,38)
-                                print('check',t_[0][-1],(Wt_*hp.time_scale)[0][0],loss_event_part_wt_[0][-1][0])
-                                lambda_all_0_ = np.tile(np.expand_dims(lambda_all_0_,1),[1,num,1])
-                                lambda_all_ = np.exp((lambda_all_0_+loss_event_part_wt_)/hp.exp_constant)#(16,1000,38)
-
-                                # print(lambda_all_0_.shape,lambda_all_.shape)
-                                Wt_ = np.tile(np.expand_dims(Wt_,0),[num,1,1])#(1000,38,1)
-
-                                # print(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-1/Wt_).shape)
-                                temp = np.exp(np.sum(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-hp.exp_constant/(Wt_*hp.time_scale)),axis=(2,3)))#(16,1000)
-
-                                # print(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)).shape)
-                                time_pred_ = time_maximum * np.average(np.multiply(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)),t_),(1,2))
-
-                                # print('Wt',Wt_[0])
-                                # print('prob1',np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1)[0][-1])
-                                # #print('prob2',np.expand_dims(np.sum(lambda_all_,2),-1)[0][:100])
-                                # print('prob2',lambda_all_0_[0][0])
-                                # print('prob2_part',loss_event_part_wt_[0][-1])
-                                # print('t',t_[0][0])
-                                # print('Wt_',Wt_[0])
-                                #
                                 print('pred',time_pred_)
                                 print('true',train_times_label_batch)
 
