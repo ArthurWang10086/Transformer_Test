@@ -268,7 +268,9 @@ class Transformer_Graph():
 
                             temp = np.exp(np.sum(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-hp.exp_constant/(Wt_*hp.time_scale)),axis=(2,3)))#(16,1000)
                             time_pred_ = time_maximum * np.average(np.multiply(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)),t_),(1,2))
-                            self.mse += sum((time_pred_-train_times_label_batch)**2)
+                            self.mse += sum([x if x<10000 else 0 for x in (time_pred_-train_times_label_batch)**2])
+                            if(self.mse>300000):
+                                print(time_pred_,train_times_label_batch)
 
                             train_writer.add_summary(summary, batch_i)
 
@@ -307,19 +309,19 @@ class Transformer_Graph():
 
                             temp = np.exp(np.sum(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-hp.exp_constant/(Wt_*hp.time_scale)),axis=(2,3)))#(16,1000)
                             time_pred_ = time_maximum * np.average(np.multiply(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)),t_),(1,2))
-                            self.mse_test += sum((time_pred_-valid_times_label_batchs)**2)
+                            self.mse_test += sum([x if x<10000 else 0 for x in (time_pred_-valid_times_label_batchs)**2])
 
 
                             test_writer.add_summary(summary, batch_i)
                             if(batch_i%300==0 or (batch_i % max_batchsize) > max_batchsize-3):
-                                print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f}  - Train rmse: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}  - Test rmse: {:>6.3f}'
+                                print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f} -Train mse: {:>6.3f} - Train rmse: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}  - Test rmse: {:>6.3f}'
                                       .format(epoch_i,
                                               hp.epochs,
                                               (batch_i % max_batchsize) + 1,
                                               max_batchsize,
                                               (0.0+self.loss_sum)/self.acc_count,
                                               (0.0+self.acc_true)/self.acc_count,
-
+                                              self.mse,
                                               np.sqrt((0.0+self.mse)/self.acc_count),
                                               (0.0+self.loss_sum_test)/self.acc_count_test,
                                               (0.0+self.acc_true_test)/self.acc_count_test,
