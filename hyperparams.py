@@ -91,16 +91,26 @@ class Hyperparams:
     # train_size = 332683
     # test_size = 121199
 
-
-    ########################nsh nsh nsh nsh#################
-    output_unit=38
+    ########################finance finance finance finance#################
+    output_unit=2
     batch_size = 16
     learning_rate = 0.001
-    maxlen = 10  # max length of Pad Sequence
-    FILE_PATH = 'data/'
-    epochs = 30
-    train_size = 72450
-    test_size = 30084
+    maxlen = 3  # max length of Pad Sequence
+    FILE_PATH = 'data/finance/'
+    epochs = 20
+    train_size = 278592
+    test_size = 119424
+
+
+    ########################nsh nsh nsh nsh#################
+    # output_unit=38
+    # batch_size = 16
+    # learning_rate = 0.001
+    # maxlen = 10  # max length of Pad Sequence
+    # FILE_PATH = 'data/'
+    # epochs = 30
+    # train_size = 72450
+    # test_size = 30084
 
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'
