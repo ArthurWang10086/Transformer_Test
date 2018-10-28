@@ -93,7 +93,7 @@ class Transformer_Graph():
 
             yield pad_enc_logdesignid_batch[shuffleIndex], batch_target[shuffleIndex], batch_time[shuffleIndex], batch_time_label[shuffleIndex], batch_time_gap[shuffleIndex]
 
-    def transformer(self,enc_embed_input,action_length,target,time,time_gap,issin = False,is_training=True):
+    def transformer(self,enc_embed_input,action_length,target,time,time_gap,issin = True,is_training=True):
         # Encoder
         # Embedding
         print('[transformer_model] enc_input', enc_embed_input.get_shape())
@@ -102,7 +102,7 @@ class Transformer_Graph():
             enc = embedding(enc_embed_input,
                             vocab_size=action_length,
                             num_units=hp.hidden_units,
-                            scale=True,
+                            scale=False,
                             scope='enc_embed')
             if issin:
                 # Position Encoding
@@ -135,7 +135,8 @@ class Transformer_Graph():
                                               dropout_rate=hp.dropout_rate,
                                               is_training=self.is_training,
                                               T_input=time)
-                    enc2 = feedforward(enc1, num_units=[4 * hp.hidden_units, hp.hidden_units])
+                    enc2 = enc1
+                    # enc2 = feedforward(enc1, num_units=[4 * hp.hidden_units, hp.hidden_units])
 
         with tf.variable_scope("point_process"):
 
@@ -150,7 +151,10 @@ class Transformer_Graph():
 
             #shape
             #enc2    [batch_size,hp.maxlen,hp.hidden_units]
-
+            # b = tf.get_variable('pp_b',[hp.output_unit,1],tf.float32,initializer=tf.glorot_uniform_initializer)
+            # Wt = tf.get_variable('pp_Wt',[hp.output_unit,1],tf.float32,initializer=tf.glorot_uniform_initializer)
+            # Wd = tf.get_variable('pp_Wd',[hp.output_unit,hp.maxlen],tf.float32,initializer=tf.glorot_uniform_initializer)
+            # Wh = tf.get_variable('pp_Wh',[hp.output_unit,hp.maxlen*hp.hidden_units,1],tf.float32,initializer=tf.glorot_uniform_initializer)
             b = tf.Variable(tf.random_uniform([hp.output_unit, 1], -1.0, 1.0))
             Wt = tf.Variable(tf.random_uniform([hp.output_unit, 1], 0.0, 1.0))
             Wd = tf.Variable(tf.random_uniform([hp.output_unit, hp.maxlen], -1.0, 1.0))
@@ -207,7 +211,7 @@ class Transformer_Graph():
 
                 # Optimizer
                 global_steps = tf.Variable(0, name='global_step', trainable=False)
-                train_op = tf.train.AdamOptimizer(hp.learning_rate, beta1=0.9, beta2=0.98, epsilon=1e-8).minimize(cost,global_step=global_steps)
+                train_op = tf.train.AdamOptimizer(hp.learning_rate, beta1=0.9, beta2=0.999, epsilon=1e-8).minimize(cost,global_step=global_steps)
 
                 # 2.Start train
                 checkpoint = hp.transformer_model_file + "best_model.ckpt"
@@ -314,14 +318,13 @@ class Transformer_Graph():
 
                             test_writer.add_summary(summary, batch_i)
                             if(batch_i%300==0 or (batch_i % max_batchsize) > max_batchsize-3):
-                                print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f} -Train mse: {:>6.3f} - Train rmse: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}  - Test rmse: {:>6.3f}'
+                                print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f}  - Train rmse: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}  - Test rmse: {:>6.3f}'
                                       .format(epoch_i,
                                               hp.epochs,
                                               (batch_i % max_batchsize) + 1,
                                               max_batchsize,
                                               (0.0+self.loss_sum)/self.acc_count,
                                               (0.0+self.acc_true)/self.acc_count,
-                                              self.mse,
                                               np.sqrt((0.0+self.mse)/self.acc_count),
                                               (0.0+self.loss_sum_test)/self.acc_count_test,
                                               (0.0+self.acc_true_test)/self.acc_count_test,

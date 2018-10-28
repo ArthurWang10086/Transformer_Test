@@ -41,7 +41,7 @@ class Hyperparams:
     # model
     vocab_size = 1000
     min_cnt = 3  # words whose occurred less than min_cnt are encoded as <UNK>.
-    hidden_units = 16
+    hidden_units = 64
     num_blocks = 1  # number of encoder/decoder blocks
     num_heads = 8
     dropout_rate = 0.2
@@ -98,8 +98,8 @@ class Hyperparams:
     learning_rate = 0.001
     maxlen = 10  # max length of Pad Sequence
     FILE_PATH = 'data/'
-    epochs = 20
-    train_size = 72449
+    epochs = 30
+    train_size = 72450
     test_size = 30084
 
 

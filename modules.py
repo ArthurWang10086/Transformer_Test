@@ -132,7 +132,7 @@ def multihead_attention(queries, keys, num_units=None, num_heads=4, dropout_rate
         query_masks = tf.sign(tf.abs(tf.reduce_sum(queries, axis=-1)))  # (N, T_q)
         query_masks = tf.tile(query_masks, [num_heads, 1])  # (h*N, T_q)
         query_masks = tf.tile(tf.expand_dims(query_masks, -1), [1, 1, tf.shape(keys)[1]])  # (h*N, T_q, T_k)
-        outputs *= query_masks  # broadcasting. (N, T_q, C)
+        outputs *= query_masks  # broadcasting. (h*N, T_q, T_k)
 
         # Dropouts
         outputs2 = tf.layers.dropout(outputs, rate=dropout_rate, training=tf.convert_to_tensor(is_training))
@@ -150,6 +150,63 @@ def multihead_attention(queries, keys, num_units=None, num_heads=4, dropout_rate
         outputs2 = normalize(outputs2)  # (N, T_q, C)
 
     return outputs2,outputs
+
+
+def multihead_attention_keras(queries, keys, size_per_head=None, nb_head=4, dropout_rate=0, is_training=True,
+                        causality=False, scope="multihead_attention", reuse=None, T_input=None):
+    with tf.variable_scope(scope):
+
+        WQ = tf.Variable(tf.random_uniform([hp.hidden_units,size_per_head*nb_head], -1.0, 1.0))
+        WK = tf.Variable(tf.random_uniform([hp.hidden_units,size_per_head*nb_head], -1.0, 1.0))
+        WV = tf.Variable(tf.random_uniform([hp.hidden_units,size_per_head*nb_head], -1.0, 1.0))
+
+
+        # WQ = tf.get_variable('WQ',[32,size_per_head*nb_head],initializer=tf.glorot_uniform_initializer)
+        # WK = tf.get_variable('WK',[tf.shape(queries)[2],size_per_head*nb_head],tf.float32,initializer=tf.glorot_uniform_initializer)
+        # WV = tf.get_variable('WV',[tf.shape(queries)[2],size_per_head*nb_head],tf.float32,initializer=tf.glorot_uniform_initializer)
+        import keras
+        Q_seq = keras.backend.dot(queries, WQ)
+        # print('T_seq shape:',Q_seq.shape,self.WQ.shape)
+        Q_seq = tf.reshape(Q_seq, (-1, hp.maxlen, 8, size_per_head))
+        Q_seq = tf.transpose(Q_seq, [0,2,1,3])
+        K_seq = keras.backend.dot(queries, WK)
+        K_seq = tf.reshape(K_seq, (-1, hp.maxlen, 8, size_per_head))
+        K_seq = tf.transpose(K_seq, [0,2,1,3])
+        V_seq = keras.backend.dot(queries, WV)
+        V_seq = tf.reshape(V_seq, (-1, hp.maxlen, nb_head, size_per_head))
+        V_seq = tf.transpose(V_seq, [0,2,1,3])
+
+        A = keras.backend.batch_dot(Q_seq, K_seq, axes=[3,3]) / size_per_head**0.5
+        # print('T_seq shape:',tf.matmul(Q_seq, K_seq, adjoint_a=None, adjoint_b=True).shape)
+        #print('T_seq shape:',Q_seq.shape,K_seq.shape,A.shape)
+        Q_len,V_len = None,None
+        def Mask(inputs, seq_len, mode='mul'):
+            if seq_len == None:
+                return inputs
+            else:
+                mask = tf.one_hot(seq_len[:,0], tf.shape(inputs)[1])
+                mask = 1 - tf.cumsum(mask, 1)
+                for _ in range(len(inputs.shape)-2):
+                    mask = tf.expand_dims(mask, 2)
+                if mode == 'mul':
+                    return inputs * mask
+                if mode == 'add':
+                    return inputs - (1 - mask) * 1e12
+
+        A = tf.transpose(A, [0,3,2,1])
+        A = Mask(A, V_len, 'add')
+        A = tf.transpose(A, [0,3,2,1])
+        A = tf.nn.softmax(A)
+        #输出并mask
+        O_seq = keras.backend.batch_dot(A, V_seq, axes=[3,2])
+        O_seq = tf.transpose(O_seq, [0,2,1,3])
+        O_seq = tf.reshape(O_seq, (-1, hp.maxlen, size_per_head*nb_head))
+        O_seq = Mask(O_seq, Q_len, 'mul')
+        return O_seq
+
+
+
+
 
 def multihead_attention_time(queries, keys, num_units=None, num_heads=4, dropout_rate=0, is_training=True,
                         causality=False, scope="multihead_attention", reuse=None, T_input=None):
