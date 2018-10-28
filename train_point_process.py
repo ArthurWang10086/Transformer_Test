@@ -217,8 +217,8 @@ class Transformer_Graph():
                 checkpoint = hp.transformer_model_file + "best_model.ckpt"
 
                 with tf.Session(graph=self.graph) as sess:
-                    # config = tf.ConfigProto(inter_op_parallelism_threads=hp.inter_op_parallelism_threads,intra_op_parallelism_threads=hp.intra_op_parallelism_threads)
-                    # sess = tf.Session(config=config)
+                    config = tf.ConfigProto(inter_op_parallelism_threads=hp.inter_op_parallelism_threads,intra_op_parallelism_threads=hp.intra_op_parallelism_threads)
+                    sess = tf.Session(config=config)
                     merged = tf.summary.merge_all()
                     train_writer = tf.summary.FileWriter(hp.log_file + 'train', sess.graph)
                     test_writer = tf.summary.FileWriter(hp.log_file + 'test')
@@ -258,7 +258,7 @@ class Transformer_Graph():
                             self.acc_true += sum([xx[i]==yy[i] for i in range(0,len(xx))])
                             self.loss_sum += loss
                             num=300
-                            time_maximum=0.2
+                            time_maximum=0.5
                             batch_num = len(train_targets_batch)
                             t_ = np.linspace(0, time_maximum, num=num)
                             t_ = np.tile(np.reshape(t_,[1,-1,1]),[batch_num,1,1])#(16,1000,1)

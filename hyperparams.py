@@ -82,24 +82,24 @@ class Hyperparams:
 
 
     ########################so so so so#################
-    # output_unit=23
+    output_unit=23
+    batch_size = 128
+    learning_rate = 0.0014
+    maxlen = 3  # max length of Pad Sequence
+    FILE_PATH = 'data/so/'
+    epochs = 10
+    train_size = 332683
+    test_size = 121199
+
+    ########################finance finance finance finance#################
+    # output_unit=2
     # batch_size = 16
     # learning_rate = 0.001
     # maxlen = 3  # max length of Pad Sequence
-    # FILE_PATH = 'data/so/'
-    # epochs = 10
-    # train_size = 332683
-    # test_size = 121199
-
-    ########################finance finance finance finance#################
-    output_unit=2
-    batch_size = 16
-    learning_rate = 0.001
-    maxlen = 3  # max length of Pad Sequence
-    FILE_PATH = 'data/finance/'
-    epochs = 20
-    train_size = 278592
-    test_size = 119424
+    # FILE_PATH = 'data/finance/'
+    # epochs = 20
+    # train_size = 278592
+    # test_size = 119424
 
 
     ########################nsh nsh nsh nsh#################
