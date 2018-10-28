@@ -50,7 +50,7 @@ if __name__ == '__main__':
                 final_time_gap.append([0]+[(L[i+1]-L[i])/time_norm for i in range(0,len(L)-1)][:])
             else:
                 final_time_gap.append([(data[i]-data[i-1])/time_norm]+[(L[i+1]-L[i])/time_norm for i in range(0,len(L)-1)][:])
-            final_time.append([(x-L[0])/time_norm for x in L][:])
+            final_time.append([math.exp((x-L[0])/time_norm) for x in L][:])
            # final_time.append([float(x-L[0])/max(L) for x in L][:])
             #final_time.append(L)
         if len(final_time)>70000:
@@ -109,7 +109,7 @@ if __name__ == '__main__':
                 final_time_gap.append([0]+[(L[i+1]-L[i])/time_norm for i in range(0,len(L)-1)][:])
             else:
                 final_time_gap.append([(data[i]-data[i-1])/time_norm]+[(L[i+1]-L[i])/time_norm for i in range(0,len(L)-1)][:])
-            final_time.append([(x-L[0])/time_norm for x in L][:])
+            final_time.append([math.exp((x-L[0])/time_norm)for x in L][:])
         if len(final_time)>30000:
             break
 
