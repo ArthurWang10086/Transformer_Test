@@ -7,7 +7,7 @@ import os
 
 if __name__ == '__main__':
     YUZHI=3+1
-    time_norm = 100000.0
+    time_norm = 100000000.0
     file = open('dataset/event_so_train.txt','r')
     final_data=[]
     final_label=[]

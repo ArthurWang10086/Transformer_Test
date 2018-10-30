@@ -80,16 +80,41 @@ class Hyperparams:
     # FILE_PATH = 'data/mimic_fold/'
     # epochs = 30
 
+    # ########################meme meme meme meme meme meme#################
+    output_unit=5000
+    vocab_size = 10000
+    batch_size = 64
+    learning_rate = 0.0016
+    maxlen = 3  # max length of Pad Sequence
+    FILE_PATH = 'data/data_meme/'
+    epochs = 30
+    train_size=70011
+    test_size=6374
+    ########################reweet reweet reweet reweet reweet#################
+    # output_unit = 3
+    # batch_size = 128
+    # learning_rate = 0.002
+    # maxlen = 3  # max length of Pad Sequence
+    # FILE_PATH = 'data/data_reweet/'
+    # epochs = 30
+    # train_size = 70133
+    # test_size = 30019
 
     ########################so so so so#################
-    output_unit=23
-    batch_size = 128
-    learning_rate = 0.0014
-    maxlen = 3  # max length of Pad Sequence
-    FILE_PATH = 'data/so/'
-    epochs = 10
-    train_size = 332683
-    test_size = 121199
+    # output_unit=23
+    # batch_size = 128
+    # learning_rate = 0.0014
+    # maxlen = 3  # max length of Pad Sequence
+    # FILE_PATH = 'data/so_rmtpp/'
+    # epochs = 10
+    # # train_size = 332683
+    # # 367260
+    # # 300182
+    # train_size = 367260
+    # # test_size = 121199
+    # # 93255
+    # # 107269
+    # test_size = 93255
 
     ########################finance finance finance finance#################
     # output_unit=2
@@ -104,8 +129,8 @@ class Hyperparams:
 
     ########################nsh nsh nsh nsh#################
     # output_unit=38
-    # batch_size = 16
-    # learning_rate = 0.001
+    # batch_size = 128
+    # learning_rate = 0.002
     # maxlen = 10  # max length of Pad Sequence
     # FILE_PATH = 'data/'
     # epochs = 30
