@@ -2,12 +2,11 @@ import json
 import pickle
 import sys
 import math
-from hyperparams import Hyperparams as hp
 import os
 
 if __name__ == '__main__':
-    YUZHI=10+1
-    time_norm = 1000.0
+    YUZHI=18+1
+    time_norm = 10000.0
     file = open('dataset/savefile_event_train1.txt','r')
     final_data=[]
     final_label=[]

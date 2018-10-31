@@ -2,7 +2,6 @@ import json
 import pickle
 import sys
 import math
-from hyperparams import Hyperparams as hp
 import os
 
 if __name__ == '__main__':
