@@ -56,8 +56,8 @@ if __name__ == '__main__':
     O_seq = Attention_directional(8,16,S_inputs_time)([embeddings,embeddings,embeddings])
     O_seq = Flatten()(O_seq)
     #O_seq = GlobalAveragePooling1D()(O_seq)
-    O_seq = Dropout(0.2)(O_seq)
-    O_seq = Dense(OUTPUT_UNIT, activation='relu', name='dense')(O_seq)
+    # O_seq = Dropout(0.2)(O_seq)
+    # O_seq = Dense(OUTPUT_UNIT, activation='relu', name='dense')(O_seq)
 
     O_seq = Dropout(0.2)(O_seq)
     outputs = Dense(OUTPUT_UNIT,activation='softmax')(O_seq)
@@ -102,8 +102,9 @@ if __name__ == '__main__':
     x_test = np.array(x_test_list)
     # x_train = np.concatenate((x_train, x_train_time), axis=0)
     # x_test = np.concatenate((x_test, x_test_time), axis=0)
-    y_train = np_utils.to_categorical(y_train_list,OUTPUT_UNIT)
-    y_test = np_utils.to_categorical(y_test_list,OUTPUT_UNIT)
+    y_train = np.array([[1,0] if x==1 else [0,1] for x in y_train_list]) if OUTPUT_UNIT==2 else np_utils.to_categorical(np.array(y_train_list)-1,OUTPUT_UNIT)
+    y_test = np.array([[1,0] if x==1 else [0,1] for x in y_test_list]) if OUTPUT_UNIT==2 else np_utils.to_categorical(np.array(y_test_list)-1,OUTPUT_UNIT)
+
 
     print(len(x_train), 'train sequences')
     print(len(x_test), 'test sequences')
@@ -114,5 +115,5 @@ if __name__ == '__main__':
     print('x_train shape:', x_train.shape)
     print('x_test shape:', x_test.shape)
     print('-------------------------')
-    model.fit([x_train, x_train_time], y_train,epochs=20,batch_size=BATCHSIZE,validation_data=([x_test,x_test_time], y_test))
+    model.fit([x_train, x_train_time], y_train,epochs=hp.epochs,batch_size=BATCHSIZE,validation_data=([x_test,x_test_time], y_test))
 
