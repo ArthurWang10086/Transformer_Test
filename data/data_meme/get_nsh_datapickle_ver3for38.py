@@ -23,8 +23,6 @@ if __name__ == '__main__':
         for i in range(len(data)-YUZHI+1):
             final_data.append(data[i:i+YUZHI-1])
             final_label.append(data[i+YUZHI-1])
-        if len(final_label)>70000:
-            break
 
     file = open('dataset/all_raw_traintime.txt','r')
     final_time=[]
@@ -52,8 +50,6 @@ if __name__ == '__main__':
             final_time.append([math.exp((x-L[0])/time_norm) for x in L][:])
            # final_time.append([float(x-L[0])/max(L) for x in L][:])
             #final_time.append(L)
-        if len(final_time)>70000:
-            break
 
 
     print(len(final_label),len(final_time))
@@ -81,8 +77,6 @@ if __name__ == '__main__':
         for i in range(len(data)-YUZHI+1):
             final_data.append(data[i:i+YUZHI-1])
             final_label.append(data[i+YUZHI-1])
-        if len(final_label)>30000:
-            break
     file.close()
 
     file = open('dataset/all_raw_testtime.txt','r')
@@ -109,8 +103,6 @@ if __name__ == '__main__':
             else:
                 final_time_gap.append([(data[i]-data[i-1])/time_norm]+[(L[i+1]-L[i])/time_norm for i in range(0,len(L)-1)][:])
             final_time.append([math.exp((x-L[0])/time_norm)for x in L][:])
-        if len(final_time)>30000:
-            break
 
     print(len(final_data),len(final_time))
     pickle.dump(final_data, open('all_datatest_seq'+str(YUZHI)+'.pkl', "wb"))
