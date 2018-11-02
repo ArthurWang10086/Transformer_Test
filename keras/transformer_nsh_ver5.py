@@ -57,8 +57,8 @@ if __name__ == '__main__':
     O_seq = Attention(8,16,S_inputs_time)([embeddings,embeddings,embeddings])
     O_seq = Flatten()(O_seq)
     #O_seq = GlobalAveragePooling1D()(O_seq)
-    O_seq = Dropout(0.2)(O_seq)
-    O_seq = Dense(40, activation='relu', name='dense')(O_seq)
+    # O_seq = Dropout(0.2)(O_seq)
+    # O_seq = Dense(40, activation='relu', name='dense')(O_seq)
 
     O_seq = Dropout(0.2)(O_seq)
     outputs = Dense(OUTPUT_UNIT,activation='softmax')(O_seq)
