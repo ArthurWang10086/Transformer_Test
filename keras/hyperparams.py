@@ -52,7 +52,7 @@ class Hyperparams:
     print_model = transformer_model_file+'epoch20batch%s.ckpt'%(str(saver_step))
 
 ########################mimic mimic mimic mimic#################
-    # output_unit=76
+    # output_unit=75
     # # training
     # batch_size = 4
     # learning_rate = 0.001
@@ -61,31 +61,56 @@ class Hyperparams:
     # epochs = 50
 
 ########################mimic_fold mimic_fold mimic_fold mimic_fold#################
-    output_unit=76
-    # training
-    batch_size = 4
-    learning_rate = 0.001
-    maxlen = 3
-    FILE_PATH = '../data/mimic_fold/'
-    epochs = 30
-
-
-########################so so so so#################
-    # output_unit=23
-    # batch_size = 16
+    # output_unit=75
+    # # training
+    # batch_size = 4
     # learning_rate = 0.001
+    # maxlen = 3
+    # FILE_PATH = '../data/mimic_fold/'
+    # epochs = 30
+
+
+# ########################so so so so#################
+#     output_unit=22
+#     batch_size = 16
+#     learning_rate = 0.001
+#     maxlen = 3  # max length of Pad Sequence
+#     FILE_PATH = '../data/so_rmtpp/'
+#     epochs = 30
+
+# ########################meme meme meme meme meme meme#################
+#     output_unit=5000
+#     vocab_size = 10000
+#     batch_size = 128
+#     learning_rate = 0.0016
+#     maxlen = 3  # max length of Pad Sequence
+#     FILE_PATH = '../data/data_meme/'
+#     epochs = 30
+
+#######################reweet reweet reweet reweet reweet#################
+    # output_unit = 3
+    # batch_size = 32
+    # learning_rate = 0.001
+    # maxlen = 18  # max length of Pad Sequence
+    # FILE_PATH = '../data/data_reweet/'
+    # epochs = 300
+
+#######################finance finance finance finance #################
+    # output_unit=2
+    # batch_size = 16
+    # learning_rate = 0.002
     # maxlen = 3  # max length of Pad Sequence
-    # FILE_PATH = '../data/so/'
-    # epochs = 10
+    # FILE_PATH = '../data/finance/'
+    # epochs = 30
 
 
 ########################nsh nsh nsh nsh#################
-    # output_unit=38
-    # batch_size = 16
-    # learning_rate = 0.001
-    # maxlen = 10  # max length of Pad Sequence
-    # FILE_PATH = '../data/'
-    # epochs = 20
+    output_unit=37
+    batch_size = 64
+    learning_rate = 0.001
+    maxlen = 18  # max length of Pad Sequence
+    FILE_PATH = '../data/'
+    epochs = 200
 
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'

@@ -58,14 +58,27 @@ if __name__ == '__main__':
     O_seq = Flatten()(O_seq)
     #O_seq = GlobalAveragePooling1D()(O_seq)
     O_seq = Dropout(0.2)(O_seq)
-    O_seq = Dense(OUTPUT_UNIT, activation='relu', name='dense')(O_seq)
+    O_seq = Dense(40, activation='relu', name='dense')(O_seq)
 
     O_seq = Dropout(0.2)(O_seq)
     outputs = Dense(OUTPUT_UNIT,activation='softmax')(O_seq)
 
     model = Model(inputs=[S_inputs_x,S_inputs_time], outputs=outputs)
     # try using different optimizers and different optimizer configs
-    model.compile(loss='categorical_crossentropy',
+    import keras.optimizers
+    # model.compile(loss='categorical_crossentropy',
+    #               optimizer=keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08),
+    #               metrics=['accuracy'])
+    # model.compile(loss='categorical_crossentropy',
+    #               optimizer=keras.optimizers.TFOptimizer(tf.train.AdamOptimizer(hp.learning_rate, beta1=0.9, beta2=0.999, epsilon=1e-8)),
+    #               metrics=['accuracy'])
+
+    # model.compile(loss='categorical_crossentropy',
+    #               optimizer='adam',
+    #               metrics=['accuracy'])
+    # tf.nn.softmax_cross_entropy_with_logits(logits=X, labels=Y)
+    from keras.backend import categorical_crossentropy
+    model.compile(loss=categorical_crossentropy,
                   optimizer='adam',
                   metrics=['accuracy'])
 
@@ -98,8 +111,8 @@ if __name__ == '__main__':
     x_test = np.array(x_test_list)
     # x_train = np.concatenate((x_train, x_train_time), axis=0)
     # x_test = np.concatenate((x_test, x_test_time), axis=0)
-    y_train = np_utils.to_categorical(y_train_list,OUTPUT_UNIT)
-    y_test = np_utils.to_categorical(y_test_list,OUTPUT_UNIT)
+    y_train = np.array([[1,0] if x==1 else [0,1] for x in y_train_list]) if OUTPUT_UNIT==2 else np_utils.to_categorical(np.array(y_train_list)-1,OUTPUT_UNIT)
+    y_test = np.array([[1,0] if x==1 else [0,1] for x in y_test_list]) if OUTPUT_UNIT==2 else np_utils.to_categorical(np.array(y_test_list)-1,OUTPUT_UNIT)
 
     print(len(x_train), 'train sequences')
     print(len(x_test), 'test sequences')

@@ -105,10 +105,10 @@ class Attention(Layer):
 
         Q_seq = K.dot(Q_seq, self.WQ)
         # print('T_seq shape:',Q_seq.shape,self.WQ.shape)
-        Q_seq = K.reshape(Q_seq, (-1, K.shape(Q_seq)[1], 8, 16))
+        Q_seq = K.reshape(Q_seq, (-1, K.shape(Q_seq)[1], 8, self.size_per_head))
         Q_seq = K.permute_dimensions(Q_seq, (0,2,1,3))
         K_seq = K.dot(K_seq, self.WK)
-        K_seq = K.reshape(K_seq, (-1, K.shape(K_seq)[1], 8, 16))
+        K_seq = K.reshape(K_seq, (-1, K.shape(K_seq)[1], 8, self.size_per_head))
         K_seq = K.permute_dimensions(K_seq, (0,2,1,3))
         V_seq = K.dot(V_seq, self.WV)
         V_seq = K.reshape(V_seq, (-1, K.shape(V_seq)[1], self.nb_head, self.size_per_head))
