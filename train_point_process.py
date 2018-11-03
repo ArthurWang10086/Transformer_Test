@@ -273,6 +273,11 @@ class Transformer_Graph():
                             temp = np.exp(np.sum(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-hp.exp_constant/(Wt_*hp.time_scale)),axis=(2,3)))#(16,1000)
                             time_pred_ = time_maximum * np.average(np.multiply(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)),t_),(1,2))
                             self.mse += sum([x if x<100 else 100 for x in (time_pred_-train_times_label_batch)**2])
+
+                            for i in range(len(time_pred_)):
+                                if ((time_pred_-train_times_label_batch)**2)[i]>100:
+                                    print(time_pred_[i],train_times_label_batch[i])
+
                             if(self.mse>300000):
                                 print(time_pred_,train_times_label_batch)
 
@@ -314,7 +319,6 @@ class Transformer_Graph():
                             temp = np.exp(np.sum(np.multiply(np.expand_dims(lambda_all_-np.exp(lambda_all_0_/hp.exp_constant),-1),-hp.exp_constant/(Wt_*hp.time_scale)),axis=(2,3)))#(16,1000)
                             time_pred_ = time_maximum * np.average(np.multiply(np.multiply(np.expand_dims(temp,-1),np.expand_dims(np.sum(lambda_all_,2),-1)),t_),(1,2))
                             self.mse_test += sum([x if x<100 else 100 for x in (time_pred_-valid_times_label_batchs)**2])
-
 
                             test_writer.add_summary(summary, batch_i)
                             if(batch_i%300==0 or (batch_i % max_batchsize) > max_batchsize-3):
