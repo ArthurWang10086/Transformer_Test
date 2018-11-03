@@ -321,23 +321,23 @@ class Transformer_Graph():
                             self.mse_test += sum([x if x<100 else 100 for x in (time_pred_-valid_times_label_batchs)**2])
 
                             test_writer.add_summary(summary, batch_i)
-                            if(batch_i%300==0 or (batch_i % max_batchsize) > max_batchsize-3):
-                                print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f}  - Train rmse: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}  - Test rmse: {:>6.3f}'
-                                      .format(epoch_i,
-                                              hp.epochs,
-                                              (batch_i % max_batchsize) + 1,
-                                              max_batchsize,
-                                              (0.0+self.loss_sum)/self.acc_count,
-                                              (0.0+self.acc_true)/self.acc_count,
-                                              np.sqrt((0.0+self.mse)/self.acc_count),
-                                              (0.0+self.loss_sum_test)/self.acc_count_test,
-                                              (0.0+self.acc_true_test)/self.acc_count_test,
+                        if(batch_i%300==0 or (batch_i % max_batchsize) > max_batchsize-3):
+                            print('Epoch {:>3}/{} Batch {:>4}/{} - Loss: {:>6.3f} - Train acc: {:>6.3f}  - Train rmse: {:>6.3f} - TestLoss: {:>6.3f} - Test acc: {:>6.3f}  - Test rmse: {:>6.3f}'
+                                  .format(epoch_i,
+                                          hp.epochs,
+                                          (batch_i % max_batchsize) + 1,
+                                          max_batchsize,
+                                          (0.0+self.loss_sum)/self.acc_count,
+                                          (0.0+self.acc_true)/self.acc_count,
+                                          np.sqrt((0.0+self.mse)/self.acc_count),
+                                          (0.0+self.loss_sum_test)/self.acc_count_test,
+                                          (0.0+self.acc_true_test)/self.acc_count_test,
 
-                                              np.sqrt((0.0+self.mse_test)/self.acc_count)
-                                              ))
+                                          np.sqrt((0.0+self.mse_test)/self.acc_count)
+                                          ))
 
-                                print('pred',time_pred_)
-                                print('true',train_times_label_batch)
+                            print('pred',time_pred_)
+                            print('true',train_times_label_batch)
 
 
                         if ((batch_i % max_batchsize) + 1) % hp.saver_step == 0:
