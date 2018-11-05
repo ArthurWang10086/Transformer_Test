@@ -54,7 +54,9 @@ class Transformer_Graph():
 
         X_ndarray = np.array(x_list)
         Time_ndarray = np.array(Time_list)
-        y_ndarray = np_utils.to_categorical(y_list, hp.output_unit)   #根据Loss定
+        # y_ndarray = np_utils.to_categorical(y_list, hp.output_unit)   #根据Loss定
+        y_ndarray = np.array([[1,0] if x==1 else [0,1] for x in y_list]) if hp.output_unit==2 else np_utils.to_categorical(y_list,hp.output_unit)
+
         count = 0
 
         shuffleIndex0 = np.random.permutation(len(y_ndarray))
@@ -191,7 +193,7 @@ class Transformer_Graph():
 
                 # Optimizer
                 global_steps = tf.Variable(0, name='global_step', trainable=False)
-                train_op = tf.train.AdamOptimizer(hp.learning_rate, beta1=0.9, beta2=0.98, epsilon=1e-8).minimize(cost,global_step=global_steps)
+                train_op = tf.train.AdamOptimizer(hp.learning_rate, beta1=0.9, beta2=0.999, epsilon=1e-8).minimize(cost,global_step=global_steps)
 
                 # 2.Start train
                 checkpoint = hp.transformer_model_file + "best_model.ckpt"

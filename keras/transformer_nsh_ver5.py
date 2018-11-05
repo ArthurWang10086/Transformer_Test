@@ -77,8 +77,8 @@ if __name__ == '__main__':
     #               optimizer='adam',
     #               metrics=['accuracy'])
     # tf.nn.softmax_cross_entropy_with_logits(logits=X, labels=Y)
-    from keras.backend import categorical_crossentropy
-    model.compile(loss=categorical_crossentropy,
+    # from keras.backend import categorical_crossentropy
+    model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
 

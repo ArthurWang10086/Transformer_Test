@@ -5,7 +5,7 @@ import math
 import os
 
 if __name__ == '__main__':
-    YUZHI=18+1
+    YUZHI=10+1
     time_norm = 10000.0
     file = open('dataset/savefile_event_train1.txt','r')
     final_data=[]
@@ -24,6 +24,7 @@ if __name__ == '__main__':
             final_data.append(data[i:i+YUZHI-1])
             final_label.append(data[i+YUZHI-1])
         if len(final_label)>70000:
+            print(count)
             break
 
     file = open('dataset/savefile_time_train1.txt','r')
@@ -53,6 +54,7 @@ if __name__ == '__main__':
            # final_time.append([float(x-L[0])/max(L) for x in L][:])
             #final_time.append(L)
         if len(final_time)>70000:
+            print(count)
             break
 
 
@@ -82,6 +84,7 @@ if __name__ == '__main__':
             final_data.append(data[i:i+YUZHI-1])
             final_label.append(data[i+YUZHI-1])
         if len(final_label)>30000:
+            print(count)
             break
     file.close()
 
@@ -110,6 +113,7 @@ if __name__ == '__main__':
                 final_time_gap.append([(data[i]-data[i-1])/time_norm]+[(L[i+1]-L[i])/time_norm for i in range(0,len(L)-1)][:])
             final_time.append([math.exp((x-L[0])/time_norm)for x in L][:])
         if len(final_time)>30000:
+            print(count)
             break
 
     print(len(final_data),len(final_time))

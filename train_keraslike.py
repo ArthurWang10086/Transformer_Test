@@ -54,7 +54,9 @@ class Transformer_Graph():
 
         X_ndarray = np.array(x_list)
         Time_ndarray = np.array(Time_list)
-        y_ndarray = np_utils.to_categorical(y_list, hp.output_unit)   #根据Loss定
+        # y_ndarray = np_utils.to_categorical(y_list, hp.output_unit)   #根据Loss定
+        y_ndarray = np.array([[1,0] if x==1 else [0,1] for x in y_list]) if hp.output_unit==2 else np_utils.to_categorical(y_list,hp.output_unit)
+
         count = 0
 
         shuffleIndex0 = np.random.permutation(len(y_ndarray))
@@ -91,7 +93,7 @@ class Transformer_Graph():
                 # Position Encoding
                 enc += positional_encoding(enc_embed_input,
                                            num_units=32,
-                                           scale=False,
+                                           scale=True,
                                            scope="enc_pe")
             else:
                 enc += embedding(
@@ -103,19 +105,19 @@ class Transformer_Graph():
                     scope="enc_pe")
 
             ## Dropout
-            if is_training:
-                enc = tf.layers.dropout(enc,
-                                        rate=hp.dropout_rate,
-                                        training=tf.convert_to_tensor(self.is_training))
+            # if is_training:
+            #     enc = tf.layers.dropout(enc,
+            #                             rate=hp.dropout_rate,
+            #                             training=tf.convert_to_tensor(self.is_training))
             time = time
             ## Blocks
             for i in range(hp.num_blocks):
                 with tf.variable_scope("num_blocks_{}".format(i)):
                     ### Multihead Attention
-                    enc1,align_score = multihead_attention(queries=enc,
+                    enc1,align_score = multihead_attention_keras(queries=enc,
                                               keys=enc,
                                               num_units=32,
-                                              num_heads=hp.num_heads,
+                                              num_heads=1,
                                               dropout_rate=hp.dropout_rate,
                                               is_training=self.is_training,
                                               T_input=time)
@@ -198,7 +200,7 @@ class Transformer_Graph():
 
                 # Optimizer
                 global_steps = tf.Variable(0, name='global_step', trainable=False)
-                train_op = tf.train.AdamOptimizer(hp.learning_rate, beta1=0.9, beta2=0.98, epsilon=1e-8).minimize(cost,global_step=global_steps)
+                train_op = tf.train.AdamOptimizer(hp.learning_rate, beta1=0.9, beta2=0.999, epsilon=1e-8).minimize(cost,global_step=global_steps)
 
                 # 2.Start train
                 checkpoint = hp.transformer_model_file + "best_model.ckpt"

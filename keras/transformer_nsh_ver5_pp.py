@@ -104,8 +104,9 @@ if __name__ == '__main__':
     x_test = np.array(x_test_list)
     # x_train = np.concatenate((x_train, x_train_time), axis=0)
     # x_test = np.concatenate((x_test, x_test_time), axis=0)
-    y_train = np_utils.to_categorical(y_train_list,OUTPUT_UNIT)
-    y_test = np_utils.to_categorical(y_test_list,OUTPUT_UNIT)
+    y_train = np.array([[1,0] if x==1 else [0,1] for x in y_train_list]) if OUTPUT_UNIT==2 else np_utils.to_categorical(np.array(y_train_list)-1,OUTPUT_UNIT)
+    y_test = np.array([[1,0] if x==1 else [0,1] for x in y_test_list]) if OUTPUT_UNIT==2 else np_utils.to_categorical(np.array(y_test_list)-1,OUTPUT_UNIT)
+
 
     print(len(x_train), 'train sequences')
     print(len(x_test), 'test sequences')

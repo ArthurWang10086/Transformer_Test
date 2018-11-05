@@ -61,15 +61,16 @@ class Hyperparams:
     #plug_dataset_file_test = '/home/luoyifan/dataset/nsh/sanhuangua/transformer/v_3/dataset/plugin_test/'
 
     ########################mimic mimic mimic mimic#################
-    # output_unit=76
-    # # training
-    # batch_size = 4
-    # learning_rate = 0.001
-    # maxlen = 3
-    # FILE_PATH = 'data/mimic/'
-    # epochs = 50
-    # train_size = 440
-    # test_size = 135
+    output_unit=76
+    # training
+    batch_size = 4
+    learning_rate = 0.001
+    maxlen = 3
+    FILE_PATH = 'data/mimic/'
+    epochs = 50
+    train_size = 440
+    test_size = 135
+    display_step = 4
 
     ########################mimic_fold mimic_fold mimic_fold mimic_fold#################
     # output_unit=76
@@ -81,15 +82,15 @@ class Hyperparams:
     # epochs = 30
 
     # ########################meme meme meme meme meme meme#################
-    output_unit=5000
-    vocab_size = 10000
-    batch_size = 64
-    learning_rate = 0.0016
-    maxlen = 3  # max length of Pad Sequence
-    FILE_PATH = 'data/data_meme/'
-    epochs = 30
-    train_size=70011
-    test_size=6374
+    # output_unit=5000
+    # vocab_size = 10000
+    # batch_size = 64
+    # learning_rate = 0.0016
+    # maxlen = 3  # max length of Pad Sequence
+    # FILE_PATH = 'data/data_meme/'
+    # epochs = 30
+    # train_size=225984
+    # test_size=6374
     ########################reweet reweet reweet reweet reweet#################
     # output_unit = 3
     # batch_size = 128
@@ -121,7 +122,7 @@ class Hyperparams:
     # batch_size = 16
     # learning_rate = 0.001
     # maxlen = 3  # max length of Pad Sequence
-    # FILE_PATH = 'data/finance/'
+    # FILE_PATH = 'data/finance_100/'
     # epochs = 20
     # train_size = 278592
     # test_size = 119424

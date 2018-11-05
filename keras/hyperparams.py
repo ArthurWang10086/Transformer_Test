@@ -72,10 +72,10 @@ class Hyperparams:
 
 # ########################so so so so#################
 #     output_unit=22
-#     batch_size = 16
-#     learning_rate = 0.001
+#     batch_size = 64
+#     learning_rate = 0.0014
 #     maxlen = 3  # max length of Pad Sequence
-#     FILE_PATH = '../data/so_rmtpp/'
+#     FILE_PATH = '../data/so/'
 #     epochs = 30
 
 # ########################meme meme meme meme meme meme#################
@@ -98,19 +98,19 @@ class Hyperparams:
 #######################finance finance finance finance #################
     # output_unit=2
     # batch_size = 16
-    # learning_rate = 0.002
+    # learning_rate = 0.001
     # maxlen = 3  # max length of Pad Sequence
-    # FILE_PATH = '../data/finance/'
+    # FILE_PATH = '../data/finance_100/'
     # epochs = 30
 
 
 ########################nsh nsh nsh nsh#################
-    output_unit=37
-    batch_size = 64
-    learning_rate = 0.001
-    maxlen = 18  # max length of Pad Sequence
-    FILE_PATH = '../data/'
-    epochs = 200
+    # output_unit=37
+    # batch_size = 64
+    # learning_rate = 0.001
+    # maxlen = 10  # max length of Pad Sequence
+    # FILE_PATH = '../data/'
+    # epochs = 200
 
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'
