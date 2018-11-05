@@ -105,12 +105,12 @@ class Hyperparams:
 
 
 ########################nsh nsh nsh nsh#################
-    # output_unit=37
-    # batch_size = 64
-    # learning_rate = 0.001
-    # maxlen = 10  # max length of Pad Sequence
-    # FILE_PATH = '../data/'
-    # epochs = 200
+    output_unit=37
+    batch_size = 64
+    learning_rate = 0.001
+    maxlen = 10  # max length of Pad Sequence
+    FILE_PATH = '../data/'
+    epochs = 200
 
 
     X_file_train = FILE_PATH + 'all_datatrain_seq' + str(maxlen + 1) + '.pkl'
